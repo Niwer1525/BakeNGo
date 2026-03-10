@@ -1,0 +1,27 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral() // Use Maven Central for resolving dependencies.
+}
+
+dependencies {
+    // Use JUnit Jupiter for testing.
+    testImplementation "org.junit.jupiter:junit-jupiter:${project.junit_jupiter_version}"
+
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+
+    // This dependency is used by the application.
+    implementation "com.google.guava:guava:${project.guava_version}"
+}
+
+// Apply a specific Java toolchain to ease working on different environments.
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+tasks.named('test') {
+    // Use JUnit Platform for unit tests.
+    useJUnitPlatform()
+}
