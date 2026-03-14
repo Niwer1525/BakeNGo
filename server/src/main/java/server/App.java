@@ -3,12 +3,72 @@
  */
 package server;
 
+import java.io.File;
+
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import io.javalin.Javalin;
+import niwer.lumen.Console;
+import niwer.lumen.LumenEngine;
+import server.db.DataManager;
+import server.logging.CroissantFlowLogTypes;
+
 public class App {
-    public String getGreeting() {
-        return "Hello World!";
-    }
+    public static final File BASE_FOLDER = new File("./croissant_flow_data");
 
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+        LumenEngine.removeDefaultHandlers();
+        Console.log("Starting the server").type(CroissantFlowLogTypes.WEB_SERVER).send();
+        // final var STARTING_TIMER = Console.startTimer();
+
+        /* Change debug level */
+        {
+            final Logger JAVALIN_LOGGER = (Logger) LoggerFactory.getLogger("io.javalin");
+            JAVALIN_LOGGER.setLevel(Level.WARN);
+    
+            final Logger JETTY_LOGGER = (Logger) LoggerFactory.getLogger("org.eclipse.jetty");
+            JETTY_LOGGER.setLevel(Level.WARN);
+        }
+
+        /* Init base folder */
+        if(!BASE_FOLDER.exists()) {
+            Console.log("Creating base folder at " + BASE_FOLDER.getAbsolutePath()).type(CroissantFlowLogTypes.WEB_SERVER).send();
+            if(!BASE_FOLDER.mkdirs()) throw new RuntimeException("Failed to create base folder at " + BASE_FOLDER.getAbsolutePath());
+        }
+        
+        /* Load configuration */
+        final Configuration CONFIG = Configuration.fromFile();
+
+        /* Database */
+        DataManager.load();
+
+        /* Initialize the web server */
+        {
+            final var APP = Javalin.create(cfg -> {
+                Console.log("Starting Web Server via Javalin").type(CroissantFlowLogTypes.WEB_SERVER).send();
+    
+                // cfg.defaultContentType = "application/json";
+                // cfg.enableCorsForAllOrigins();
+                
+                cfg.staticFiles.add("/public");
+    
+                cfg.routes.get("/status", ctx -> ctx.result("Hello World"));
+                cfg.routes.post("/restart", ctx -> {
+                    ctx.status(200).result("Restarting...");
+                });
+            });
+            APP.start(CONFIG.getServerPort());
+            // Console.log("Web Server initialized").type(EnumLogType.WEB_SERVER).send();
+        }
+        
+        /* Add shutdown hooks */
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            Console.log("Shutting down the server").type(CroissantFlowLogTypes.WEB_SERVER).send();
+            DataManager.disconnect();
+        }));
+
+        // STARTING_TIMER.stop("Application started in %d ms").send();
     }
 }

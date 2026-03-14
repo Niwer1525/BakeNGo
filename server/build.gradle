@@ -1,9 +1,16 @@
+buildscript {
+    repositories {
+		mavenCentral()
+	}
+}
+
 plugins {
     id 'java'
 }
 
 repositories {
     mavenCentral() // Use Maven Central for resolving dependencies.
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -14,6 +21,11 @@ dependencies {
 
     // This dependency is used by the application.
     implementation "com.google.guava:guava:${project.guava_version}"
+    implementation "io.javalin:javalin:${project.javalin_version}"
+    implementation "com.google.code.gson:gson:${project.gson_version}"
+    implementation "org.xerial:sqlite-jdbc:${project.sqlite_jdbc_version}"
+    implementation "ch.qos.logback:logback-classic:${project.logback_version}"
+    implementation "com.github.Niwer1525:Lumen:${project.lumen_version}"
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

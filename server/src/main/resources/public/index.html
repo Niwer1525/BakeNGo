@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Croissant Flow</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Welcome to Croissant Flow</h1>
+    <p>This is the main page of the Croissant Flow application.</p>
+    <button type="button" id="restart-btn">Restart Server</button>
+
+    <script>
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            fetch('/restart', { method: 'POST' })
+                .then(response => response.text())
+                .then(data => alert(data))
+                .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>

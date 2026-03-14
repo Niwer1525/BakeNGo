@@ -4,4 +4,8 @@
 # Ignore Gradle build output directory
 build
 
+# IDE specific files
 .vscode
+
+# Ignore the data folder where the server will store its data
+croissant_flow_data
