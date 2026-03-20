@@ -50,6 +50,15 @@ p {
     border-bottom: 1px solid rgba(241, 220, 194, 0.7);
 }
 
+.role-separator-banner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1rem 0.6rem;
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
 .navbar {
     max-width: 1100px;
     margin: 0 auto;
@@ -88,6 +97,16 @@ p {
     gap: 0.55rem;
 }
 
+.auth-status {
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: #fffdf8;
+    color: var(--ink);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
 .btn {
     border: 0;
     border-radius: 999px;
@@ -121,6 +140,19 @@ p {
 
 .btn.small {
     padding: 0.45rem 0.8rem;
+    font-size: 0.9rem;
+}
+
+.icon-btn {
+    width: 2.1rem;
+    min-width: 2.1rem;
+    padding-inline: 0;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-btn i {
     font-size: 0.9rem;
 }
 
@@ -225,12 +257,88 @@ section {
     font-size: clamp(1.3rem, 3.5vw, 2rem);
 }
 
+.area-badge {
+    display: inline-block;
+    margin-left: 0.45rem;
+    vertical-align: middle;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-weight: 800;
+    padding: 0.22rem 0.5rem;
+    border-radius: 999px;
+}
+
+.area-badge.customer {
+    background: #eaf7ff;
+    color: #1b5f9a;
+}
+
+.area-badge.admin {
+    background: #fff1de;
+    color: #a35a1a;
+}
+
 .product-grid,
 .dashboard-grid,
 .analytics-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 0.75rem;
+}
+
+.catalog-section {
+    position: relative;
+    padding: 0.2rem;
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(109, 182, 232, 0.08), rgba(109, 182, 232, 0.02));
+}
+
+.dashboard-section {
+    position: relative;
+    padding: 0.2rem;
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(243, 146, 55, 0.12), rgba(243, 146, 55, 0.03));
+}
+
+.basket-panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 0.9rem;
+    box-shadow: var(--shadow-soft);
+    animation: rise 0.6s ease both;
+    animation-delay: 0.12s;
+}
+
+.basket-header,
+.basket-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.basket-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.7rem 0;
+    display: grid;
+    gap: 0.45rem;
+}
+
+.basket-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.6rem;
+    border-radius: 10px;
+    background-color: #fff5e3;
+}
+
+.basket-empty {
+    color: var(--ink-soft);
 }
 
 .product-card,
@@ -294,7 +402,8 @@ section {
 }
 
 .stock-list,
-.order-list {
+.order-list,
+.all-orders-list {
     list-style: none;
     margin: 0.75rem 0 0;
     padding: 0;
@@ -303,9 +412,12 @@ section {
 }
 
 .stock-list li,
-.order-list li {
+.order-list li,
+.all-orders-list li {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
     gap: 0.6rem;
     padding: 0.6rem 0.7rem;
     border-radius: 12px;
@@ -313,9 +425,39 @@ section {
     color: var(--ink);
 }
 
+.stock-input,
+.status-select {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background-color: #fffdf8;
+    color: var(--ink);
+    font: inherit;
+    padding: 0.35rem 0.45rem;
+}
+
+.stock-input {
+    width: 84px;
+}
+
+.manage-actions {
+    display: inline-flex;
+    gap: 0.4rem;
+}
+
 .order-list li span:nth-child(2) {
     color: var(--ink-soft);
     font-size: 0.9rem;
+}
+
+.all-orders-list li span:nth-child(2),
+.order-list li span:nth-child(2) {
+    color: var(--ink-soft);
+    font-size: 0.88rem;
+}
+
+.admin-order-item button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .action-card p {
@@ -325,6 +467,77 @@ section {
 .action-card .btn {
     margin-top: 0.9rem;
     width: 100%;
+}
+
+.admin-controls-card {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.admin-form {
+    display: grid;
+    gap: 0.5rem;
+    padding: 0.7rem;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background-color: #fff7ea;
+}
+
+.admin-form h4 {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.admin-form input {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background-color: #fffdf8;
+    color: var(--ink);
+    font: inherit;
+    padding: 0.45rem 0.55rem;
+}
+
+.inline-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+}
+
+.admin-form-spacer {
+    display: block;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+}
+
+.admin-feedback {
+    min-height: 1.2rem;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+}
+
+.admin-slot-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.45rem;
+}
+
+.admin-slot-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.55rem;
+    border-radius: 10px;
+    background: #fff5e3;
 }
 
 .metric-label {
@@ -419,6 +632,10 @@ section {
     cursor: pointer;
 }
 
+.is-hidden {
+    display: none !important;
+}
+
 @media (min-width: 760px) {
     .nav-links {
         display: flex;
@@ -430,6 +647,10 @@ section {
 
     .hero-section {
         grid-template-columns: 1.35fr 1fr;
+    }
+
+    .hero-section .basket-panel {
+        grid-column: 2;
     }
 
     .product-grid {

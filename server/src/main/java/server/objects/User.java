@@ -11,7 +11,7 @@ public class User extends SQLSerializable<User> {
     @IColumnField(name = "email", unique = true, notNull = true)
     private String email;
 
-    @IColumnField(name = "password", unique = true, notNull = true)
+    @IColumnField(name = "password", notNull = true)
     private String password;
 
     @IColumnField(name = "is_admin")

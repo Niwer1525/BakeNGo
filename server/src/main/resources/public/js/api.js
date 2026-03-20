@@ -1,0 +1,95 @@
+export async function apiRequest(path, options = {}) {
+    const response = await fetch(path, {
+        headers: { "Content-Type": "application/json" },
+        ...options
+    });
+
+    if (response.status === 204) return null;
+
+    const bodyText = await response.text();
+    if (!response.ok) throw new Error(bodyText || `HTTP ${response.status}`);
+    return bodyText ? JSON.parse(bodyText) : null;
+}
+
+export function fetchProducts() {
+    return apiRequest("/api/products");
+}
+
+export function fetchPickupSlots(includeDisabled = false) {
+    return apiRequest(`/api/pickup-slots?include_disabled=${includeDisabled ? "true" : "false"}`);
+}
+
+export function fetchOrders() {
+    return apiRequest("/api/orders");
+}
+
+export function fetchOrderItems(orderId) {
+    return apiRequest(`/api/orders/${orderId}/items`);
+}
+
+export function createOrder(payload) {
+    return apiRequest("/api/orders", {
+        method: "POST",
+        body: JSON.stringify(payload)
+    });
+}
+
+export function updateProductStock(productId, stock) {
+    return apiRequest(`/api/products/${productId}/stock`, {
+        method: "PUT",
+        body: JSON.stringify({ stock })
+    });
+}
+
+export function updateOrderStatus(orderId, status) {
+    return apiRequest(`/api/orders/${orderId}/status`, {
+        method: "PUT",
+        body: JSON.stringify({ status })
+    });
+}
+
+export function deleteOrder(orderId) {
+    return apiRequest(`/api/orders/${orderId}`, {
+        method: "DELETE"
+    });
+}
+
+export function createProduct(payload) {
+    return apiRequest("/api/products", {
+        method: "POST",
+        body: JSON.stringify(payload)
+    });
+}
+
+export function createPickupSlot(payload) {
+    return apiRequest("/api/pickup-slots", {
+        method: "POST",
+        body: JSON.stringify(payload)
+    });
+}
+
+export function deleteProduct(productId) {
+    return apiRequest(`/api/products/${productId}`, {
+        method: "DELETE"
+    });
+}
+
+export function deletePickupSlot(label) {
+    return apiRequest(`/api/pickup-slots/${encodeURIComponent(label)}`, {
+        method: "DELETE"
+    });
+}
+
+export function signUp(payload) {
+    return apiRequest("/api/auth/sign-up", {
+        method: "POST",
+        body: JSON.stringify(payload)
+    });
+}
+
+export function signIn(payload) {
+    return apiRequest("/api/auth/sign-in", {
+        method: "POST",
+        body: JSON.stringify(payload)
+    });
+}

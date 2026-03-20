@@ -22,17 +22,33 @@ public class TableProduct extends Table {
 
     @Override public String name() { return "products"; }
 
-    public static void addProduct(String name, String description, int priceCents, int stock, boolean isActive) {
+    /**
+     * Adds a new product to the database.
+     * 
+     * @param name The name of the product to add
+     * @param description The description of the product to add (can be null or empty)
+     * @param priceCents The price of the product in cents (must be non-negative)
+     * @param stock The stock quantity of the product (must be non-negative)
+     * @param isActive Whether the product should be active and visible to customers
+     */
+    public static synchronized void addProduct(String name, String description, int priceCents, int stock, boolean isActive) {
         name = normalizeName(name);
         description = normalizeDescription(description);
         validatePrice(priceCents);
         validateStock(stock);
+        final int productId = getNextProductId();
 
-        InsertionManager.insert(App.DATA_BASE, TableProduct.class, "name", "description", "price_cents", "stock", "is_active")
-            .row(name, description, priceCents, stock, isActive)
+        InsertionManager.insert(App.DATA_BASE, TableProduct.class, "id", "name", "description", "price_cents", "stock", "is_active")
+            .row(productId, name, description, priceCents, stock, isActive)
             .execute();
     }
 
+    /**
+     * Gets a product from the database by its id.
+     * 
+     * @param id The id of the product to get
+     * @return The product with the given id, or null if no such product exists
+     */
     public static Product getProductById(int id) {
         validateId(id, "Product id");
 
@@ -42,6 +58,11 @@ public class TableProduct extends Table {
             .executeSerializable(Product.class);
     }
 
+    /**
+     * Gets all products from the database, ordered by id ascending.
+     * 
+     * @return A list of all products in the database, ordered by id ascending. If there are no products, returns an empty list.
+     */
     public static List<Product> getAllProducts() {
         final SelectionManager query = SelectionManager.select(App.DATA_BASE, TableProduct.class,
             "COALESCE(NULLIF(id, 0), rowid) AS id", "name", "description", "price_cents", "stock", "is_active")
@@ -55,6 +76,11 @@ public class TableProduct extends Table {
         }
     }
 
+    /**
+     * Gets all active products from the database, ordered by id ascending.
+     * 
+     * @return A list of all active products in the database, ordered by id ascending. If there are no active products, returns an empty list.
+     */
     public static List<Product> getActiveProducts() {
         final SelectionManager query = SelectionManager.select(App.DATA_BASE, TableProduct.class,
             "COALESCE(NULLIF(id, 0), rowid) AS id", "name", "description", "price_cents", "stock", "is_active")
@@ -69,6 +95,12 @@ public class TableProduct extends Table {
         }
     }
 
+    /**
+     * Updates the stock quantity of a product in the database.
+     * 
+     * @param id The id of the product to update
+     * @param stock The new stock quantity for the product
+     */
     public static void updateStock(int id, int stock) {
         validateId(id, "Product id");
         validateStock(stock);
@@ -80,6 +112,11 @@ public class TableProduct extends Table {
             .execute();
     }
 
+    /**
+     * Deletes a product from the database by its id.
+     * 
+     * @param id The id of the product to delete
+     */
     public static void deleteProduct(int id) {
         validateId(id, "Product id");
         ensureProductExists(id);
@@ -115,5 +152,12 @@ public class TableProduct extends Table {
     private static String normalizeDescription(String description) {
         if (description == null) return "";
         return description.trim();
+    }
+
+    private static int getNextProductId() {
+        return getAllProducts().stream()
+            .mapToInt(Product::id)
+            .max()
+            .orElse(0) + 1;
     }
 }

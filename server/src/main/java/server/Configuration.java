@@ -10,6 +10,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Json Configuration class for the application. This class is responsible for reading and writing the configuration file, as well as providing default values for the configuration parameters.
+ * The configuration file is stored in the base folder of the application and is named "config.json
+ * 
+ * @author Niwer
+ */
 public class Configuration {
     private static final Gson PRETTY_GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Gson GSON = new GsonBuilder().create();

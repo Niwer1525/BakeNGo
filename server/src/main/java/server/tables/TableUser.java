@@ -1,5 +1,7 @@
 package server.tables;
 
+import java.util.List;
+
 import niwer.queryon.DataBase;
 import niwer.queryon.queries.Expression;
 import niwer.queryon.queries.interaction.InsertionManager;
@@ -27,16 +29,28 @@ public class TableUser extends Table {
      * 
      * @throws IllegalArgumentException If the email is null or empty or not valid, or if the password is null or empty
      */
-    public static void addUser(String email, String password, boolean isAdmin) {
+    public static synchronized void addUser(String email, String password, boolean isAdmin) {
         if(email == null || email.isEmpty()) throw new IllegalArgumentException("Email cannot be null or empty");
         if(!isEmailValid(email)) throw new IllegalArgumentException("Email is not valid");
         if(password == null || password.isEmpty()) throw new IllegalArgumentException("Password cannot be null or empty");
         email = email.toLowerCase().trim(); // Normalize email
+        if(doesUserExist(email)) throw new IllegalArgumentException("An account already exists for this email");
+        final int userId = getNextUserId();
         password = App.hashPassword(password); // Hash the password
 
-        InsertionManager.insert(App.DATA_BASE, TableUser.class, "email", "password", "is_admin")
-            .row(email, password, isAdmin)
+        InsertionManager.insert(App.DATA_BASE, TableUser.class, "id", "email", "password", "is_admin")
+            .row(userId, email, password, isAdmin)
             .execute();
+    }
+
+    /**
+     * Creates a non-admin account for the given credentials.
+     *
+     * @param email The account email
+     * @param password The plain password
+     */
+    public static void createAccount(String email, String password) {
+        addUser(email, password, false);
     }
 
     /**
@@ -101,8 +115,39 @@ public class TableUser extends Table {
         return USER != null && USER.password().equals(password);
     }
 
+    /**
+     * Attempts to sign in a user and returns their user object if credentials are valid.
+     *
+     * @param email The account email
+     * @param password The plain password
+     * @return The matching user if credentials are valid, otherwise null
+     */
+    public static User signIn(String email, String password) {
+        return authenticateUser(email, password) ? getUserByEmail(email) : null;
+    }
+
     private static boolean isEmailValid(String email) {
         // Simple regex for email validation
         return email != null && email.matches("^[A-Za-z0-9+_.-]+@(.+)$");
+    }
+
+    private static int getNextUserId() {
+        return getAllUsers().stream()
+            .mapToInt(User::id)
+            .max()
+            .orElse(0) + 1;
+    }
+
+    private static List<User> getAllUsers() {
+        final SelectionManager query = SelectionManager.select(App.DATA_BASE, TableUser.class,
+            "COALESCE(NULLIF(id, 0), rowid) AS id", "email", "password", "is_admin")
+            .orderBy("rowid", SelectionManager.EnumOrder.ASC);
+
+        try {
+            return query.executeList(User.class);
+        } catch (IllegalStateException ignored) {
+            final User single = query.executeSerializable(User.class);
+            return single == null ? List.of() : List.of(single);
+        }
     }
 }

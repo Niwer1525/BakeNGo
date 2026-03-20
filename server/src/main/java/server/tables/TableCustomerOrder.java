@@ -22,26 +22,42 @@ public class TableCustomerOrder extends Table {
 
     @Override public String name() { return "orders"; }
 
-    public static CustomerOrder addOrder(Integer userId, String customerEmail, String pickupSlot, String pickupDate, int totalCents) {
+    /**
+     * Adds a new customer order to the database. The order status is automatically set to "PENDING" and the creation and update timestamps are set to the current time.
+     * 
+     * @param userId The id of the user placing the order (can be null if the order is placed by a guest, but if provided must be greater than 0)
+     * @param customerEmail The email of the customer placing the order (must be a valid email format and non-blank)
+     * @param pickupSlot The pickup slot selected for the order (must be non-blank)
+     * @param pickupDate The pickup date selected for the order (must be non-blank)
+     * @param totalCents The total price of the order in cents (must be non-negative)
+     * @return The newly created CustomerOrder object representing the order that was added to the database
+     */
+    public static synchronized CustomerOrder addOrder(Integer userId, String customerEmail, String pickupSlot, String pickupDate, int totalCents) {
         if (userId != null && userId <= 0) throw new IllegalArgumentException("User id must be greater than 0");
         customerEmail = normalizeEmail(customerEmail);
-        pickupSlot = requireNonBlank(pickupSlot, "Pickup slot");
-        pickupDate = requireNonBlank(pickupDate, "Pickup date");
+        pickupSlot = App.requireNonBlank(pickupSlot, "Pickup slot");
+        pickupDate = App.requireNonBlank(pickupDate, "Pickup date");
         if (totalCents < 0) throw new IllegalArgumentException("Total cannot be negative");
 
+        final int orderId = getNextOrderId();
         final long now = System.currentTimeMillis();
         InsertionManager.insert(App.DATA_BASE, TableCustomerOrder.class,
-            "user_id", "customer_email", "status", "pickup_slot", "pickup_date", "total_cents", "created_at", "updated_at")
-            .row(userId, customerEmail, "PENDING", pickupSlot, pickupDate, totalCents, now, now)
+            "id", "user_id", "customer_email", "status", "pickup_slot", "pickup_date", "total_cents", "created_at", "updated_at")
+            .row(orderId, userId, customerEmail, "PENDING", pickupSlot, pickupDate, totalCents, now, now)
             .execute();
 
         return SelectionManager.select(App.DATA_BASE, TableCustomerOrder.class,
                 "COALESCE(NULLIF(id, 0), rowid) AS id", "user_id", "customer_email", "status", "pickup_slot", "pickup_date", "total_cents", "created_at", "updated_at")
-            .where(Expression.of("customer_email").isEqualTo(customerEmail)
-                .and(Expression.of("created_at").isEqualTo(now)))
+            .where(Expression.of("COALESCE(NULLIF(id, 0), rowid)").isEqualTo(orderId))
             .executeSerializable(CustomerOrder.class);
     }
 
+    /**
+     * Gets a customer order from the database by its id.
+     * 
+     * @param orderId The id of the order to get
+     * @return The CustomerOrder object representing the order, or null if not found
+     */
     public static CustomerOrder getOrderById(int orderId) {
         validateOrderId(orderId);
 
@@ -51,6 +67,11 @@ public class TableCustomerOrder extends Table {
             .executeSerializable(CustomerOrder.class);
     }
 
+    /**
+     * Gets all customer orders from the database, ordered by creation date in descending order.
+     * 
+     * @return A list of all CustomerOrder objects representing the orders in the database, ordered by creation date in descending order. If there are no orders, returns an empty list.
+     */
     public static List<CustomerOrder> getAllOrders() {
         final SelectionManager query = SelectionManager.select(App.DATA_BASE, TableCustomerOrder.class,
             "COALESCE(NULLIF(id, 0), rowid) AS id", "user_id", "customer_email", "status", "pickup_slot", "pickup_date", "total_cents", "created_at", "updated_at")
@@ -64,6 +85,12 @@ public class TableCustomerOrder extends Table {
         }
     }
 
+    /**
+     * Updates the status of a customer order in the database.
+     * 
+     * @param orderId The id of the order to update
+     * @param status The new status for the order (must be one of "PENDING", "CONFIRMED", "READY", "CANCELLED") 
+     */
     public static void updateOrderStatus(int orderId, String status) {
         validateOrderId(orderId);
         status = normalizeStatus(status);
@@ -76,6 +103,11 @@ public class TableCustomerOrder extends Table {
             .execute();
     }
 
+    /**
+     * Deletes a customer order and all associated order items from the database by the order id.
+     * 
+     * @param orderId The id of the order to delete
+     */
     public static void deleteOrder(int orderId) {
         validateOrderId(orderId);
         if (getOrderById(orderId) == null) throw new IllegalArgumentException("Order with id " + orderId + " does not exist");
@@ -94,7 +126,7 @@ public class TableCustomerOrder extends Table {
     }
 
     private static String normalizeStatus(String status) {
-        status = requireNonBlank(status, "Status").toUpperCase();
+        status = App.requireNonBlank(status, "Status").toUpperCase();
         if (!status.equals("PENDING") && !status.equals("CONFIRMED") && !status.equals("READY") && !status.equals("CANCELLED")) {
             throw new IllegalArgumentException("Status must be one of PENDING, CONFIRMED, READY, CANCELLED");
         }
@@ -102,15 +134,15 @@ public class TableCustomerOrder extends Table {
     }
 
     private static String normalizeEmail(String email) {
-        email = requireNonBlank(email, "Customer email").toLowerCase();
+        email = App.requireNonBlank(email, "Customer email").toLowerCase();
         if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) throw new IllegalArgumentException("Customer email is not valid");
         return email;
     }
 
-    private static String requireNonBlank(String value, String label) {
-        if (value == null) throw new IllegalArgumentException(label + " cannot be null");
-        final String normalizedValue = value.trim();
-        if (normalizedValue.isEmpty()) throw new IllegalArgumentException(label + " cannot be empty");
-        return normalizedValue;
+    private static int getNextOrderId() {
+        return getAllOrders().stream()
+            .mapToInt(CustomerOrder::id)
+            .max()
+            .orElse(0) + 1;
     }
 }

@@ -20,13 +20,21 @@ public class TableAnalyticsMetric extends Table {
 
     @Override public String name() { return "analytics_metrics"; }
 
-    public static void addMetric(String metricKey, String metricValue, String metricDate) {
-        metricKey = requireNonBlank(metricKey, "Metric key");
-        metricValue = requireNonBlank(metricValue, "Metric value");
-        metricDate = requireNonBlank(metricDate, "Metric date");
+    /**
+     * Adds a new analytics metric to the database with the specified key, value, and date. The creation timestamp is automatically set to the current time.
+     * 
+     * @param metricKey The key or name of the metric to add
+     * @param metricValue The value of the metric to add
+     * @param metricDate The date associated with the metric (e.g., the date the metric was recorded or is relevant for)
+     */
+    public static synchronized void addMetric(String metricKey, String metricValue, String metricDate) {
+        metricKey = App.requireNonBlank(metricKey, "Metric key");
+        metricValue = App.requireNonBlank(metricValue, "Metric value");
+        metricDate = App.requireNonBlank(metricDate, "Metric date");
+        final int metricId = getNextMetricId();
 
-        InsertionManager.insert(App.DATA_BASE, TableAnalyticsMetric.class, "metric_key", "metric_value", "metric_date", "created_at")
-            .row(metricKey, metricValue, metricDate, Instant.now().toString())
+        InsertionManager.insert(App.DATA_BASE, TableAnalyticsMetric.class, "id", "metric_key", "metric_value", "metric_date", "created_at")
+            .row(metricId, metricKey, metricValue, metricDate, Instant.now().toString())
             .execute();
     }
 
@@ -48,10 +56,10 @@ public class TableAnalyticsMetric extends Table {
         }
     }
 
-    private static String requireNonBlank(String value, String label) {
-        if (value == null) throw new IllegalArgumentException(label + " cannot be null");
-        final String normalizedValue = value.trim();
-        if (normalizedValue.isEmpty()) throw new IllegalArgumentException(label + " cannot be empty");
-        return normalizedValue;
+    private static int getNextMetricId() {
+        return getAllMetrics().stream()
+            .mapToInt(AnalyticsMetric::id)
+            .max()
+            .orElse(0) + 1;
     }
 }
