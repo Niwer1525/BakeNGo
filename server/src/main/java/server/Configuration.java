@@ -17,7 +17,14 @@ public class Configuration {
 
     @SerializedName("server_port") private int server_port = 7000;
 
+    @SerializedName("default_admin_email") private String defaultAdminEmail = "default@admin.com";
+    @SerializedName("default_admin_password") private String defaultAdminPassword = "admin";
+
     public int getServerPort() { return server_port; }
+
+    public String getDefaultAdminEmail() { return defaultAdminEmail; }
+
+    public String getDefaultAdminPassword() { return defaultAdminPassword; }
 
     /**
      * Serialize this configuration to a JSON string.

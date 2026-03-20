@@ -1,27 +1,27 @@
 package server.objects;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import niwer.queryon.SQLSerializable;
+import niwer.queryon.tables.api.IColumnField;
 
-import server.SQLSerializable;
+public class User extends SQLSerializable<User> {
 
-public class User implements SQLSerializable<User> {
-
+    @IColumnField(name = "id", primaryKey = true, autoIncrement = true)
     private int id;
+
+    @IColumnField(name = "email", unique = true, notNull = true)
     private String email;
-    private boolean isAdmin;
+
+    @IColumnField(name = "password", unique = true, notNull = true)
+    private String password;
+
+    @IColumnField(name = "is_admin")
+    private boolean isAdmin = false;
 
     public int id() { return id; }
 
     public String email() { return email; }
 
-    public boolean isAdmin() { return isAdmin; }
+    public String password() { return password; }
 
-    @Override
-    public User objectify(ResultSet resultSet) throws SQLException {
-        this.id = resultSet.getInt("id");
-        this.email = resultSet.getString("email");
-        this.isAdmin = resultSet.getBoolean("is_admin");
-        return this;
-    }
+    public boolean isAdmin() { return isAdmin; }
 }

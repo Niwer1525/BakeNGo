@@ -4,24 +4,47 @@
 package server;
 
 import java.io.File;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import io.javalin.Javalin;
 import niwer.lumen.Console;
 import niwer.lumen.LumenEngine;
-import server.db.DataManager;
+import niwer.lumen.container.Container;
+import niwer.queryon.DataBase;
 import server.logging.CroissantFlowLogTypes;
+import server.objects.CustomerOrder;
+import server.objects.Product;
+import server.tables.TableAnalyticsMetric;
+import server.tables.TableCustomerOrder;
+import server.tables.TableOrderItem;
+import server.tables.TablePickupSlot;
+import server.tables.TableProduct;
+import server.tables.TableUser;
 
 public class App {
+    public static final Container LOGGER = new Container("Croissant-Flow");
     public static final File BASE_FOLDER = new File("./croissant_flow_data");
+    public static final DataBase DATA_BASE = new DataBase(new File(BASE_FOLDER, "main.db"));
+
+    private static Configuration config;
 
     public static void main(String[] args) {
-        LumenEngine.removeDefaultHandlers();
-        Console.log("Starting the server").type(CroissantFlowLogTypes.WEB_SERVER).send();
-        // final var STARTING_TIMER = Console.startTimer();
+        LumenEngine.disablePrintingFromDefaultContainer(); // Prevent printing to the default container, we will handle it ourselves
+        Console.log("Starting the server").type(CroissantFlowLogTypes.WEB_SERVER).container(LOGGER).send();
 
         /* Change debug level */
         {
@@ -34,41 +57,213 @@ public class App {
 
         /* Init base folder */
         if(!BASE_FOLDER.exists()) {
-            Console.log("Creating base folder at " + BASE_FOLDER.getAbsolutePath()).type(CroissantFlowLogTypes.WEB_SERVER).send();
+            Console.log("Creating base folder at " + BASE_FOLDER.getAbsolutePath()).type(CroissantFlowLogTypes.WEB_SERVER).container(LOGGER).send();
             if(!BASE_FOLDER.mkdirs()) throw new RuntimeException("Failed to create base folder at " + BASE_FOLDER.getAbsolutePath());
         }
-        
-        /* Load configuration */
-        final Configuration CONFIG = Configuration.fromFile();
 
         /* Database */
-        DataManager.load();
+        DATA_BASE.registerTable(TableProduct.class)
+            .registerTable(TablePickupSlot.class)
+            .registerTable(TableCustomerOrder.class)
+            .registerTable(TableOrderItem.class)
+            .registerTable(TableAnalyticsMetric.class)
+            .registerTable(TableUser.class);
+
+        /* Add the default admin user */
+        if(!TableUser.doesUserExist(config().getDefaultAdminEmail())) TableUser.addUser(config().getDefaultAdminEmail(), config().getDefaultAdminPassword(), true);
 
         /* Initialize the web server */
         {
             final var APP = Javalin.create(cfg -> {
-                Console.log("Starting Web Server via Javalin").type(CroissantFlowLogTypes.WEB_SERVER).send();
+                Console.log("Starting Web Server via Javalin").type(CroissantFlowLogTypes.WEB_SERVER).container(LOGGER).send();
     
                 // cfg.defaultContentType = "application/json";
                 // cfg.enableCorsForAllOrigins();
-                
+
+                cfg.routes.exception(IllegalArgumentException.class, (e, ctx) -> ctx.status(400).result(e.getMessage()));
+                cfg.routes.exception(NumberFormatException.class, (e, ctx) -> ctx.status(400).result("Invalid numeric value"));
+
                 cfg.staticFiles.add("/public");
-    
-                cfg.routes.get("/status", ctx -> ctx.result("Hello World"));
-                cfg.routes.post("/restart", ctx -> {
-                    ctx.status(200).result("Restarting...");
+
+                cfg.routes.get("/api/products", ctx -> {
+                    final boolean includeInactive = ctx.queryParamAsClass("include_inactive", Boolean.class).getOrDefault(false);
+                    if(includeInactive) ctx.json(TableProduct.getAllProducts());
+                    else ctx.json(TableProduct.getActiveProducts());
+                });
+
+                cfg.routes.post("/api/products", ctx -> {
+                    final JsonObject BODY = parseJsonBody(ctx.body());
+
+                    final String name = getRequiredString(BODY, "name");
+                    final String description = getOptionalString(BODY, "description", "");
+                    final int priceCents = getRequiredInt(BODY, "price_cents");
+                    final int stock = getRequiredInt(BODY, "stock");
+                    final boolean isActive = getOptionalBoolean(BODY, "is_active", true);
+
+                    TableProduct.addProduct(name, description, priceCents, stock, isActive);
+                    ctx.status(201).json(TableProduct.getAllProducts());
+                });
+
+                cfg.routes.post("/api/products/{id}/stock", ctx -> {
+                    final int productId = Integer.parseInt(ctx.pathParam("id"));
+                    final JsonObject BODY = parseJsonBody(ctx.body());
+                    final int stock = getRequiredInt(BODY, "stock");
+
+                    TableProduct.updateStock(productId, stock);
+                    ctx.json(TableProduct.getProductById(productId));
+                });
+
+                cfg.routes.get("/api/pickup-slots", ctx -> {
+                    final boolean includeDisabled = ctx.queryParamAsClass("include_disabled", Boolean.class).getOrDefault(false);
+                    if(includeDisabled) ctx.json(TablePickupSlot.getAllPickupSlots());
+                    else ctx.json(TablePickupSlot.getEnabledPickupSlots());
+                });
+
+                cfg.routes.post("/api/pickup-slots", ctx -> {
+                    final JsonObject BODY = parseJsonBody(ctx.body());
+
+                    final String label = getRequiredString(BODY, "label");
+                    final String startTime = getRequiredString(BODY, "start_time");
+                    final String endTime = getRequiredString(BODY, "end_time");
+                    final int capacity = getRequiredInt(BODY, "capacity");
+                    final boolean isEnabled = getOptionalBoolean(BODY, "is_enabled", true);
+
+                    TablePickupSlot.addPickupSlot(label, startTime, endTime, capacity, isEnabled);
+                    ctx.status(201).json(TablePickupSlot.getAllPickupSlots());
+                });
+
+                cfg.routes.get("/api/orders", ctx -> ctx.json(TableCustomerOrder.getAllOrders()));
+
+                cfg.routes.get("/api/orders/{id}/items", ctx -> {
+                    final int orderId = Integer.parseInt(ctx.pathParam("id"));
+                    ctx.json(TableOrderItem.getItemsByOrderId(orderId));
+                });
+
+                cfg.routes.post("/api/orders", ctx -> {
+                    final JsonObject BODY = parseJsonBody(ctx.body());
+
+                    final Integer userId = getOptionalInt(BODY, "user_id", null);
+                    final String customerEmail = getRequiredString(BODY, "customer_email");
+                    final String pickupSlot = getRequiredString(BODY, "pickup_slot");
+                    final String pickupDate = getRequiredString(BODY, "pickup_date");
+                    final JsonArray itemsJson = getRequiredArray(BODY, "items");
+
+                    if(itemsJson.isEmpty()) throw new IllegalArgumentException("Order items cannot be empty");
+
+                    final List<OrderDraftItem> items = new ArrayList<>();
+                    int totalCents = 0;
+
+                    for (int i = 0; i < itemsJson.size(); i++) {
+                        final JsonObject itemJson = itemsJson.get(i).getAsJsonObject();
+                        final int productId = getRequiredInt(itemJson, "product_id");
+                        final int quantity = getRequiredInt(itemJson, "quantity");
+                        if(quantity <= 0) throw new IllegalArgumentException("Quantity must be greater than 0");
+
+                        final Product product = TableProduct.getProductById(productId);
+                        if(product == null) throw new IllegalArgumentException("Product with id " + productId + " does not exist");
+                        if(!product.isActive()) throw new IllegalArgumentException("Product with id " + productId + " is not active");
+                        if(product.stock() < quantity) throw new IllegalArgumentException("Insufficient stock for product id " + productId);
+
+                        final int lineTotal = product.priceCents() * quantity;
+                        totalCents += lineTotal;
+                        items.add(new OrderDraftItem(productId, quantity, product.priceCents(), product.stock()));
+                    }
+
+                    final CustomerOrder order = TableCustomerOrder.addOrder(userId, customerEmail, pickupSlot, pickupDate, totalCents);
+                    if(order == null) throw new IllegalStateException("Failed to create order");
+
+                    for (final OrderDraftItem item : items) {
+                        TableOrderItem.addOrderItem(order.id(), item.productId(), item.quantity(), item.unitPriceCents());
+                        TableProduct.updateStock(item.productId(), item.initialStock() - item.quantity());
+                    }
+
+                    final Map<String, Object> response = new LinkedHashMap<>();
+                    response.put("order", TableCustomerOrder.getOrderById(order.id()));
+                    response.put("items", TableOrderItem.getItemsByOrderId(order.id()));
+                    ctx.status(201).json(response);
                 });
             });
-            APP.start(CONFIG.getServerPort());
-            // Console.log("Web Server initialized").type(EnumLogType.WEB_SERVER).send();
+
+
+            APP.start(config().getServerPort());
         }
         
         /* Add shutdown hooks */
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            Console.log("Shutting down the server").type(CroissantFlowLogTypes.WEB_SERVER).send();
-            DataManager.disconnect();
+            Console.log("Shutting down the server").type(CroissantFlowLogTypes.WEB_SERVER).container(LOGGER).send();
+            DATA_BASE.disconnect();
         }));
-
-        // STARTING_TIMER.stop("Application started in %d ms").send();
     }
+
+    /**
+     * Gets the server configuration, loading it from the config file if it hasn't been loaded yet.
+     * 
+     * @return The server configuration, loaded from the config file if not already loaded
+     */
+    public static Configuration config() {
+        if (config == null) config = Configuration.fromFile();
+        return config;
+    }
+
+    /**
+     * Hashes a password using SHA-256.
+     * 
+     * @param password The password to hash
+     * @return The hashed password, or an empty string if hashing failed
+     */
+    public static String hashPassword(String password) {
+		try {
+			final MessageDigest DIGEST = MessageDigest.getInstance("SHA-256");
+			final byte[] BYTES = DIGEST.digest(password.getBytes());
+
+            /* Hash every byte */
+			final StringBuilder HASH = new StringBuilder(new BigInteger(1, BYTES).toString(16));
+			while (HASH.length() < 32) HASH.insert(0, '0');
+
+			return HASH.toString();
+        } catch (NoSuchAlgorithmException e) { return ""; } 
+    }
+
+    private static JsonObject parseJsonBody(String body) {
+        if (body == null || body.isBlank()) throw new IllegalArgumentException("Request body cannot be empty");
+        try {
+            return JsonParser.parseString(body).getAsJsonObject();
+        } catch (RuntimeException e) {
+            throw new IllegalArgumentException("Invalid JSON payload");
+        }
+    }
+
+    private static String getRequiredString(JsonObject json, String key) {
+        if (!json.has(key) || json.get(key).isJsonNull()) throw new IllegalArgumentException("Missing required field: " + key);
+        final String value = json.get(key).getAsString();
+        if (value == null || value.isBlank()) throw new IllegalArgumentException("Field " + key + " cannot be empty");
+        return value.trim();
+    }
+
+    private static String getOptionalString(JsonObject json, String key, String defaultValue) {
+        if (!json.has(key) || json.get(key).isJsonNull()) return defaultValue;
+        return json.get(key).getAsString();
+    }
+
+    private static int getRequiredInt(JsonObject json, String key) {
+        if (!json.has(key) || json.get(key).isJsonNull()) throw new IllegalArgumentException("Missing required field: " + key);
+        return json.get(key).getAsInt();
+    }
+
+    private static Integer getOptionalInt(JsonObject json, String key, Integer defaultValue) {
+        if (!json.has(key) || json.get(key).isJsonNull()) return defaultValue;
+        return json.get(key).getAsInt();
+    }
+
+    private static boolean getOptionalBoolean(JsonObject json, String key, boolean defaultValue) {
+        if (!json.has(key) || json.get(key).isJsonNull()) return defaultValue;
+        return json.get(key).getAsBoolean();
+    }
+
+    private static JsonArray getRequiredArray(JsonObject json, String key) {
+        if (!json.has(key) || json.get(key).isJsonNull()) throw new IllegalArgumentException("Missing required field: " + key);
+        return json.getAsJsonArray(key);
+    }
+
+    private static record OrderDraftItem(int productId, int quantity, int unitPriceCents, int initialStock) {}
 }

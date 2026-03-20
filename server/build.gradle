@@ -26,6 +26,7 @@ dependencies {
     implementation "org.xerial:sqlite-jdbc:${project.sqlite_jdbc_version}"
     implementation "ch.qos.logback:logback-classic:${project.logback_version}"
     implementation "com.github.Niwer1525:Lumen:${project.lumen_version}"
+    implementation "com.github.Niwer1525:Queryon:${project.queryon_version}"
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
