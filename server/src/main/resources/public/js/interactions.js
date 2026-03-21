@@ -10,6 +10,12 @@ function setAdminFeedback(message, isError = false) {
 	dom.adminControlsFeedback.style.color = isError ? "#bb3a1d" : "var(--success)";
 }
 
+function setOrderFeedback(message, isError = false) {
+	if (!dom.orderFeedback) return;
+	dom.orderFeedback.textContent = message;
+	dom.orderFeedback.style.color = isError ? "#bb3a1d" : "var(--success)";
+}
+
 function ensureAdminAccess() {
 	if (authState.isAdmin) return true;
 	setAdminFeedback("Only admins can use dashboard configuration actions.", true);
@@ -23,19 +29,26 @@ function getCartItemsPayload() {
 }
 
 export async function placeOrder() {
+	setOrderFeedback("");
 	const items = getCartItemsPayload();
 	if (items.length === 0) {
-		alert("Your cart is empty.");
+		setOrderFeedback("Your cart is empty.", true);
 		return;
 	}
 
 	if (!state.selectedSlot) {
-		alert("Please select a pickup slot.");
+		setOrderFeedback("Please select a pickup slot.", true);
 		return;
 	}
 
-	const customerEmail = prompt("Customer email for this order:", authState.email || "customer@bakery.com");
-	if (!customerEmail) return;
+	const emailInput = dom.customerEmailInput;
+	const customerEmail = emailInput ? emailInput.value.trim() : "";
+	
+	if (!customerEmail) {
+		setOrderFeedback("Please enter your email to place the order.", true);
+		if (emailInput) emailInput.focus();
+		return;
+	}
 
 	try {
 		await createOrder({
@@ -47,10 +60,10 @@ export async function placeOrder() {
 
 		state.cart = {};
 		await refreshPageData();
-		alert("Order successfully placed.");
+		setOrderFeedback("Order successfully placed!");
 	} catch (error) {
 		console.error(error);
-		alert(`Could not place order: ${error.message}`);
+		setOrderFeedback(`Could not place order: ${error.message}`, true);
 	}
 }
 
@@ -67,9 +80,9 @@ export function wirePopups() {
 		});
 	}
 
-	if (dom.navCreateAccountBtn && dom.createAccountPopup) {
-		dom.navCreateAccountBtn.addEventListener("click", () => {
-			dom.createAccountPopup.style.display = "flex";
+	if (dom.openCreateAccountBtn && dom.createAccountPopup) {
+		dom.openCreateAccountBtn.addEventListener("click", () => {
+			dom.signInPopup.style.display = "none"; dom.createAccountPopup.style.display = "flex";
 		});
 	}
 
@@ -97,6 +110,7 @@ export function wirePopups() {
 				authState.email = user.email;
 				authState.isAdmin = Boolean(user.is_admin);
 				saveAuthState();
+				applyAuthUiState();
 				dom.signInForm.reset();
 				dom.signInPopup.style.display = "none";
 				await refreshPageData();
@@ -133,10 +147,6 @@ export function wireActions() {
 		dom.restartBtn.addEventListener("click", refreshPageData);
 	}
 
-	if (dom.startOrderBtn) {
-		dom.startOrderBtn.addEventListener("click", placeOrder);
-	}
-
 	if (dom.checkoutBtn) {
 		dom.checkoutBtn.addEventListener("click", placeOrder);
 	}
@@ -145,12 +155,6 @@ export function wireActions() {
 		dom.clearBasketBtn.addEventListener("click", () => {
 			state.cart = {};
 			renderAll();
-		});
-	}
-
-	if (dom.viewDashboardBtn) {
-		dom.viewDashboardBtn.addEventListener("click", () => {
-			document.getElementById("dashboard")?.scrollIntoView({ behavior: "smooth" });
 		});
 	}
 
@@ -227,3 +231,4 @@ export function wireActions() {
 		});
 	}
 }
+

@@ -14,6 +14,10 @@ export const authState = {
 	isAdmin: false
 };
 
+/**
+ * Centralized DOM element references for easy access across modules.
+ * This helps avoid repeated queries and keeps the code organized.
+ */
 export const dom = {
 	productGrid: document.querySelector(".product-grid"),
 	basketPanel: document.getElementById("basket-panel"),
@@ -21,6 +25,8 @@ export const dom = {
 	basketTotal: document.getElementById("basket-total"),
 	clearBasketBtn: document.getElementById("clear-basket-btn"),
 	checkoutBtn: document.getElementById("checkout-btn"),
+	customerEmailInput: document.getElementById("customer-email-input"),
+	orderFeedback: document.getElementById("order-feedback"),
 	slotList: document.querySelector(".slot-list"),
 	stockList: document.querySelector(".stock-list"),
 	orderList: document.querySelector(".order-list"),
@@ -31,7 +37,6 @@ export const dom = {
 	dashboardNavLink: document.getElementById("dashboard-nav-link"),
 	analyticsNavLink: document.getElementById("analytics-nav-link"),
 	authStatus: document.getElementById("auth-status"),
-	roleSeparatorBanner: document.getElementById("role-separator-banner"),
 	restartBtn: document.getElementById("restart-btn"),
 	heroActions: document.querySelector(".hero-actions"),
 	signInPopup: document.getElementById("sign-in-popup"),
@@ -44,8 +49,7 @@ export const dom = {
 	adminSlotForm: document.getElementById("admin-slot-form"),
 	adminSlotList: document.getElementById("admin-slot-list"),
 	adminControlsFeedback: document.getElementById("admin-controls-feedback"),
-	navCreateAccountBtn: document.querySelector(".nav-actions .btn-outline"),
-	navSignInBtn: document.querySelector(".nav-actions .btn-solid"),
-	startOrderBtn: document.querySelector(".hero-actions .btn-solid"),
-	viewDashboardBtn: document.getElementById("view-dashboard-btn")
+	openCreateAccountBtn: document.getElementById("open-create-account-btn"),
+	navSignInBtn: document.getElementById("sign-in-btn"),
 };
+

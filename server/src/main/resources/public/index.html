@@ -8,69 +8,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <header class="site-header">
-        <nav class="navbar">
-            <a class="brand" href="/">CroissantFlow</a>
-            <ul class="nav-links">
-                <li><a href="#catalog">Catalog</a></li>
-                <li><a id="dashboard-nav-link" href="#dashboard">Baker Dashboard</a></li>
-                <li><a id="analytics-nav-link" href="#analytics">Analytics</a></li>
-            </ul>
-            <div class="nav-actions">
-                <span class="auth-status" id="auth-status">Guest</span>
-                <button class="btn btn-outline" type="button">Create Account</button>
-                <button class="btn btn-solid" type="button">Sign In</button>
-            </div>
-        </nav>
-        <div class="role-separator-banner" id="role-separator-banner">Browsing as guest: customer storefront only.</div>
-    </header>
+    <inc-header></inc-header>
     <main class="page-content">
-        <section class="hero-section">
-            <div class="hero-copy">
-                <p class="eyebrow">Click &amp; Collect For Local Bakeries</p>
-                <h1>Seamless bakery ordering for busy mornings.</h1>
-                <p>
-                    CroissantFlow helps customers pre-order pastries while bakers keep stock and production in sync in real time.
-                    Fewer queues, less waste, and smoother oven planning.
-                </p>
-                <div class="hero-actions">
-                    <button class="btn btn-solid" type="button">Start Order</button>
-                    <button class="btn btn-outline" id="view-dashboard-btn" type="button">View Dashboard</button>
-                </div>
-                <aside class="basket-panel" id="basket-panel" aria-label="Shopping basket">
-                    <div class="basket-header">
-                        <h3>Your Basket</h3>
-                        <button class="btn btn-outline small" id="clear-basket-btn" type="button">Clear</button>
-                    </div>
-                    <ul class="basket-list" id="basket-list">
-                        <li class="basket-empty">Your basket is empty.</li>
-                    </ul>
-                    <div class="basket-footer">
-                        <p>Total: <strong id="basket-total">$0.00</strong></p>
-                        <button class="btn btn-solid" id="checkout-btn" type="button">Place Order</button>
-                    </div>
-                </aside>
-                </div>
-            <aside class="pickup-card" aria-label="Pickup slot preview">
-                <h2>Pickup Slot</h2>
-                <p>Choose when you want your order ready.</p>
-                <div class="slot-list">
-                    <button class="slot active" type="button">07:30</button>
-                    <button class="slot" type="button">08:00</button>
-                    <button class="slot" type="button">08:30</button>
-                    <button class="slot" type="button">09:00</button>
-                </div>
-                <p class="slot-note">Real-time stock is checked before confirmation.</p>
-            </aside>
-        </section>
-
+        <div class="introduction">
+            <h1>Seamless bakery ordering for busy mornings.</h1>
+            <p>
+                CroissantFlow helps customers pre-order pastries while bakers keep stock and production in sync in real time.
+                Fewer queues, less waste, and smoother oven planning.
+            </p>
+        </div>
         <section class="catalog-section" id="catalog" aria-labelledby="catalog-title">
             <div class="section-heading">
-                <h2 id="catalog-title">Customer Storefront <span class="area-badge customer">Customer Area</span></h2>
-                <p>Freshly baked favorites with live availability.</p>
+                <h2>Customer Storefront</h2>
             </div>
             <div class="product-grid">
                 <article class="product-card">
@@ -112,145 +64,44 @@
             </div>
         </section>
 
-        <section class="dashboard-section" id="dashboard" aria-labelledby="dashboard-title">
-            <div class="section-heading">
-                <h2 id="dashboard-title">Baker Dashboard <span class="area-badge admin">Admin Area</span></h2>
-                <p>Inventory and production status in one place.</p>
-            </div>
-            <div class="dashboard-grid">
-                <article class="dashboard-card">
-                    <h3>Live Inventory</h3>
-                    <ul class="stock-list">
-                        <li><span>Croissant</span><strong>30</strong></li>
-                        <li><span>Chocolate Croissant</span><strong>12</strong></li>
-                        <li><span>Almond Croissant</span><strong>8</strong></li>
-                    </ul>
-                </article>
-                <article class="dashboard-card">
-                    <h3>Incoming Orders</h3>
-                    <ul class="order-list">
-                        <li><span>#421</span><span>customer@bakery.com</span><span>Pickup 08:00</span><strong>$11.00</strong></li>
-                        <li><span>#422</span><span>guest@bakery.com</span><span>Pickup 08:30</span><strong>$7.50</strong></li>
-                        <li><span>#423</span><span>team@bakery.com</span><span>Pickup 09:00</span><strong>$15.20</strong></li>
-                    </ul>
-                </article>
-                <article class="dashboard-card">
-                    <h3>All Orders (Admin)</h3>
-                    <p>Remove an order only after customer pickup (completed).</p>
-                    <ul class="all-orders-list" id="all-orders-list">
-                        <li><span>#421</span><span>customer@bakery.com</span><span>READY</span><button class="btn btn-outline small icon-btn" type="button" aria-label="Remove order"><i class="fa-solid fa-trash"></i></button></li>
-                    </ul>
-                </article>
-                <article class="dashboard-card action-card">
-                    <h3>Production Action</h3>
-                    <p>Push updates instantly to customer view.</p>
-                    <button class="btn btn-solid" id="restart-btn" type="button">Restart Sync Service</button>
-                </article>
-                <article class="dashboard-card admin-controls-card">
-                    <h3>Admin Controls</h3>
-                    <p>Add products and pickup slots directly from the dashboard.</p>
-
-                    <form id="admin-product-form" class="admin-form">
-                        <h4>Add Product</h4>
-                        <input type="text" name="name" placeholder="Product name" required>
-                        <input type="text" name="description" placeholder="Description" required>
-                        <div class="inline-fields">
-                            <input type="number" name="price" min="0" placeholder="Price (e.g. 3.50)" step="0.01" required>
-                            <input type="number" name="stock" min="0" placeholder="Stock" required>
-                        </div>
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="is-active" checked>
-                            Active product
-                        </label>
-                        <button class="btn btn-solid small" type="submit">Create Product</button>
-                    </form>
-
-                    <form id="admin-slot-form" class="admin-form">
-                        <h4>Add Pickup Slot</h4>
-                        <input type="text" name="label" placeholder="Label (e.g. 08:00)" required>
-                        <div class="inline-fields">
-                            <input type="time" name="start-time" required>
-                            <input type="time" name="end-time" required>
-                        </div>
-                        <div class="inline-fields">
-                            <input type="number" name="capacity" min="1" placeholder="Capacity" required>
-                            <span class="admin-form-spacer" aria-hidden="true"></span>
-                        </div>
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="is-enabled" checked>
-                            Enabled slot
-                        </label>
-                        <button class="btn btn-solid small" type="submit">Create Pickup Slot</button>
-                    </form>
-
-                    <div class="admin-form">
-                        <h4>Manage Pickup Slots</h4>
-                        <ul class="admin-slot-list" id="admin-slot-list">
-                            <li><span>08:00</span><button class="btn btn-outline small icon-btn" type="button" aria-label="Remove pickup slot"><i class="fa-solid fa-trash"></i></button></li>
-                        </ul>
-                    </div>
-
-                    <p id="admin-controls-feedback" class="admin-feedback" aria-live="polite"></p>
-                </article>
-            </div>
+        <section class="hero-section">
+            <aside class="basket-panel" id="basket-panel" aria-label="Shopping basket">
+                <div class="basket-header">
+                    <h3>Your Basket</h3>
+                    <button class="btn btn-outline small icon-btn" id="clear-basket-btn" type="button" aria-label="Clear basket"><i class="fa-solid fa-trash"></i></button>
+                </div>
+                <ul class="basket-list" id="basket-list">
+                    <li class="basket-empty">Your basket is empty.</li>
+                </ul>
+                <div class="basket-email">
+                    <input type="email" id="customer-email-input" placeholder="john.doe@example.com" required>
+                    <p id="order-feedback" style="font-size: 0.85rem; margin-top: 0.5rem;"></p>
+                </div>
+                <div class="basket-footer">
+                    <p>Total: <strong id="basket-total">$0.00</strong></p>
+                    <button class="btn btn-solid" id="checkout-btn" type="button">Place Order</button>
+                </div>
+                <div class="hero-actions"></div>
+            </aside>
+            <aside class="pickup-card" aria-label="Pickup slot preview">
+                <h2>Pickup Slot</h2>
+                <p>Choose when you want your order ready.</p>
+                <div class="slot-list">
+                    <button class="slot active" type="button">07:30</button>
+                    <button class="slot" type="button">08:00</button>
+                    <button class="slot" type="button">08:30</button>
+                    <button class="slot" type="button">09:00</button>
+                </div>
+            </aside>
         </section>
-
-        <section class="analytics-section" id="analytics" aria-labelledby="analytics-title">
-            <div class="section-heading">
-                <h2 id="analytics-title">Smart Analytics</h2>
-                <p>Simple insights to reduce waste and optimize prep.</p>
-            </div>
-            <div class="analytics-grid">
-                <article class="metric-card">
-                    <p class="metric-label">Top Seller</p>
-                    <p class="metric-value">Butter Croissant</p>
-                    <p class="metric-note">+14% vs last week</p>
-                </article>
-                <article class="metric-card">
-                    <p class="metric-label">Estimated Waste</p>
-                    <p class="metric-value">4.8%</p>
-                    <p class="metric-note">Down from 7.1%</p>
-                </article>
-                <article class="metric-card">
-                    <p class="metric-label">Peak Pickup</p>
-                    <p class="metric-value">08:00</p>
-                    <p class="metric-note">32 orders expected</p>
-                </article>
-            </div>
-        </section>
-
-        <!-- Sign-In Popup -->
-        <div class="sign-in-popup" id="sign-in-popup">
-            <div class="popup-content">
-                <span class="close-btn" id="close-popup">&times;</span>
-                <h2>Sign In</h2>
-                <form id="sign-in-form">
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" required>
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" required autocomplete>
-                    <button type="submit">Sign In</button>
-                </form>
-            </div>
-        </div>
-        <!-- Create Account Popup -->
-        <div class="create-account-popup" id="create-account-popup">
-            <div class="popup-content">
-                <span class="close-btn" id="close-create-account-popup">&times;</span>
-                <h2>Create Account</h2>
-                <form id="create-account-form">
-                    <label for="new-email">Email:</label>
-                    <input type="email" id="new-email" name="new-email" required>
-                    <label for="new-password">Password:</label>
-                    <input type="password" id="new-password" name="new-password" required autocomplete>
-                    <button type="submit">Create Account</button>
-                </form>
-            </div>
-        </div>
+        <inc-create-account></inc-create-account>
+        <inc-login></inc-login>
     </main>
-    <footer class="site-footer">
-        <p>Digitalizing the traditional bakery experience with real-time stock and pickup flows.</p>
-    </footer>
+    <inc-footer></inc-footer>
+    <script src="inc/inc.head.js"></script>
+    <script src="inc/inc.footer.js"></script>
+    <script src="inc/inc.nav.js"></script>
+    <script src="inc/inc.auth_popups.js"></script>
     <script type="module" src="main.js"></script>
 </body>
 </html>

@@ -61,7 +61,16 @@ export function renderBasket() {
 		const lineTotal = Number(product.priceCents) * Number(quantity);
 		const row = document.createElement("li");
 		row.innerHTML = `
-			<span>${product.name} x${quantity}</span>
+			<span>${product.name}</span>
+			<div>
+				<button class="btn btn-outline small icon-btn" type="button" data-qty-change="-1" data-product-id="${product.id}" aria-label="Decrease quantity">
+					<i class="fa-solid fa-minus"></i>
+				</button>
+				<span style="min-width: 1.5rem; text-align: center;">${quantity}</span>
+				<button class="btn btn-outline small icon-btn" type="button" data-qty-change="1" data-product-id="${product.id}" aria-label="Increase quantity">
+					<i class="fa-solid fa-plus"></i>
+				</button>
+			</div>
 			<span>${formatPrice(lineTotal)}</span>
 			<button class="btn btn-outline small icon-btn" type="button" data-remove-id="${product.id}" aria-label="Remove ${product.name} from basket">
 				<i class="fa-solid fa-trash"></i>
@@ -77,6 +86,28 @@ export function renderBasket() {
 			renderProducts();
 			renderBasket();
 			renderCartSummary();
+		});
+	});
+
+	dom.basketList.querySelectorAll("button[data-qty-change]").forEach((button) => {
+		button.addEventListener("click", () => {
+			const productId = Number(button.getAttribute("data-product-id"));
+			const delta = Number(button.getAttribute("data-qty-change"));
+			if (state.cart[productId]) {
+				const newQty = state.cart[productId] + delta;
+				if (newQty <= 0) {
+					delete state.cart[productId];
+				} else {
+					// ensure it does not exceed stock
+					const product = state.products.find((item) => item.id === productId);
+					if (product && newQty <= product.stock) {
+						state.cart[productId] = newQty;
+					}
+				}
+				renderProducts();
+				renderBasket();
+				renderCartSummary();
+			}
 		});
 	});
 
