@@ -16,7 +16,7 @@ function normalizeProduct(product) {
 function normalizeSlot(slot) {
 	return {
 		id: Number(slot?.id ?? 0),
-		label: String(slot?.label ?? "N/A"),
+		day: String(slot?.day ?? "N/A"),
 		startTime: String(slot?.startTime ?? slot?.start_time ?? ""),
 		endTime: String(slot?.endTime ?? slot?.end_time ?? ""),
 		capacity: Number(slot?.capacity ?? 0),
@@ -53,7 +53,10 @@ export async function loadState() {
 	state.orders = Array.isArray(orders) ? orders.map(normalizeOrder) : [];
 
 	if (!state.selectedSlot && state.slots.length > 0) {
-		state.selectedSlot = state.slots[0].label;
+		const enabledSlots = state.slots.filter(s => s.isEnabled);
+		if(enabledSlots.length > 0) {
+			state.selectedSlot = enabledSlots[0].id;
+		}
 	}
 
 	if (!authState.isAdmin) {
@@ -76,6 +79,6 @@ export async function refreshPageData() {
 		renderAll();
 	} catch (error) {
 		console.error(error);
-		alert(`Failed to load data: ${error.message}`);
+		window.showAlert(`Failed to load data: ${error.message}`);
 	}
 }

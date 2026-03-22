@@ -41,16 +41,24 @@ export function updateProductStock(productId, stock) {
     });
 }
 
+export function updateProductDetails(productId, payload) {
+    return apiRequest(`/api/products/${productId}`, {
+        method: "PUT",
+        body: JSON.stringify(payload)
+    });
+}
+
+export function updatePickupSlotStatus(id, isEnabled) {
+    return apiRequest(`/api/pickup-slots/${id}/status`, {
+        method: "PUT",
+        body: JSON.stringify({ is_enabled: isEnabled })
+    });
+}
+
 export function updateOrderStatus(orderId, status) {
     return apiRequest(`/api/orders/${orderId}/status`, {
         method: "PUT",
         body: JSON.stringify({ status })
-    });
-}
-
-export function deleteOrder(orderId) {
-    return apiRequest(`/api/orders/${orderId}`, {
-        method: "DELETE"
     });
 }
 
@@ -74,8 +82,8 @@ export function deleteProduct(productId) {
     });
 }
 
-export function deletePickupSlot(label) {
-    return apiRequest(`/api/pickup-slots/${encodeURIComponent(label)}`, {
+export function deletePickupSlot(id) {
+    return apiRequest(`/api/pickup-slots/${id}`, {
         method: "DELETE"
     });
 }

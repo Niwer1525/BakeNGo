@@ -12,93 +12,79 @@
 </head>
 <body>
     <inc-header></inc-header>
-    <main>
+    <main class="page-content">
+        <!-- Analytics Section -->
+        <section class="analytics-section" id="analytics" aria-labelledby="analytics-title">
+            <div class="section-heading">
+                <h2 id="analytics-title">Smart Analytics</h2>
+            </div>
+            <div class="analytics-grid">
+                <article class="metric-card">
+                    <p class="metric-label">Top Seller</p>
+                    <p class="metric-value">Butter Croissant</p>
+                    <p class="metric-note">+14% vs last week</p>
+                </article>
+                <article class="metric-card">
+                    <p class="metric-label">Estimated Waste</p>
+                    <p class="metric-value">4.8%</p>
+                    <p class="metric-note">Down from 7.1%</p>
+                </article>
+                <article class="metric-card">
+                    <p class="metric-label">Peak Pickup</p>
+                    <p class="metric-value">08:00</p>
+                    <p class="metric-note">32 orders expected</p>
+                </article>
+            </div>
+        </section>
+        <!-- Dashboard Section -->
         <section class="dashboard-section" id="dashboard" aria-labelledby="dashboard-title">
             <div class="section-heading">
                 <h2 id="dashboard-title">Baker Dashboard</h2>
             </div>
+            <!-- Dashboard Grid -->
             <div class="dashboard-grid">
+                <!-- Pickup Slots Card -->
                 <article class="dashboard-card">
-                    <h3>Live Inventory</h3>
-                    <ul class="stock-list">
-                        <li><span>Croissant</span><strong>30</strong></li>
-                        <li><span>Chocolate Croissant</span><strong>12</strong></li>
-                        <li><span>Almond Croissant</span><strong>8</strong></li>
-                    </ul>
-                </article>
-                <article class="dashboard-card">
-                    <h3>Incoming Orders</h3>
-                    <ul class="order-list">
-                        <li><span>#421</span><span>customer@bakery.com</span><span>Pickup 08:00</span><strong>$11.00</strong></li>
-                        <li><span>#422</span><span>guest@bakery.com</span><span>Pickup 08:30</span><strong>$7.50</strong></li>
-                        <li><span>#423</span><span>team@bakery.com</span><span>Pickup 09:00</span><strong>$15.20</strong></li>
-                    </ul>
-                </article>
-                <article class="dashboard-card">
-                    <h3>All Orders (Admin)</h3>
-                    <p>Remove an order only after customer pickup (completed).</p>
-                    <ul class="all-orders-list" id="all-orders-list">
-                        <li><span>#421</span><span>customer@bakery.com</span><span>READY</span><button class="btn btn-outline small icon-btn" type="button" aria-label="Remove order"><i class="fa-solid fa-trash"></i></button></li>
-                    </ul>
-                </article>
-                <article class="dashboard-card action-card">
-                    <h3>Production Action</h3>
-                    <p>Push updates instantly to customer view.</p>
-                    <button class="btn btn-solid" id="restart-btn" type="button">Restart Sync Service</button>
-                </article>
-                <article class="dashboard-card admin-controls-card">
-                    <h3>Admin Controls</h3>
-                    <p>Add products and pickup slots directly from the dashboard.</p>
-
-                    <form id="admin-product-form" class="admin-form">
-                        <h4>Add Product</h4>
-                        <input type="text" name="name" placeholder="Product name" required>
-                        <input type="text" name="description" placeholder="Description" required>
-                        <div class="inline-fields">
-                            <input type="number" name="price" min="0" placeholder="Price (e.g. 3.50)" step="0.01" required>
-                            <input type="number" name="stock" min="0" placeholder="Stock" required>
-                        </div>
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="is-active" checked>
-                            Active product
-                        </label>
-                        <button class="btn btn-solid small" type="submit">Create Product</button>
-                    </form>
-
-                    <form id="admin-slot-form" class="admin-form">
-                        <h4>Add Pickup Slot</h4>
-                        <input type="text" name="label" placeholder="Label (e.g. 08:00)" required>
-                        <div class="inline-fields">
-                            <input type="time" name="start-time" required>
-                            <input type="time" name="end-time" required>
-                        </div>
-                        <div class="inline-fields">
-                            <input type="number" name="capacity" min="1" placeholder="Capacity" required>
-                            <span class="admin-form-spacer" aria-hidden="true"></span>
-                        </div>
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="is-enabled" checked>
-                            Enabled slot
-                        </label>
-                        <button class="btn btn-solid small" type="submit">Create Pickup Slot</button>
-                    </form>
-
-                    <div class="admin-form">
-                        <h4>Manage Pickup Slots</h4>
-                        <ul class="admin-slot-list" id="admin-slot-list">
-                            <li><span>08:00</span><button class="btn btn-outline small icon-btn" type="button" aria-label="Remove pickup slot"><i class="fa-solid fa-trash"></i></button></li>
-                        </ul>
+                    <div class="dashboard-card-header">
+                        <h3>Pickup Slots</h3>
+                        <button class="btn btn-solid small icon-btn" id="open-add-pickup-slot-btn" type="button" aria-label="Add pickup slot">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
                     </div>
-
-                    <p id="admin-controls-feedback" class="admin-feedback" aria-live="polite"></p>
+                    <ul class="admin-slot-list" id="admin-slot-list"></ul>
+                </article>
+                <!-- Live Inventory Card -->
+                <article class="dashboard-card">
+                    <div class="dashboard-card-header">
+                        <h3>Live Inventory</h3>
+                        <button class="btn btn-solid small icon-btn" id="open-add-product-btn" type="button" aria-label="Add product">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                    <ul class="stock-list"></ul>
+                </article>
+                <!-- Incoming Orders Card -->
+                <article class="dashboard-card">
+                    <div class="dashboard-card-header">
+                        <h3>Incoming Orders</h3>
+                        <button class="btn btn-solid small icon-btn" id="open-order-filters-btn" type="button" aria-label="Filter orders">
+                            <i class="fa-solid fa-filter"></i>
+                        </button>
+                    </div>
+                    <ul class="order-list"></ul>
                 </article>
             </div>
         </section>
     </main>
+    <inc-add-product></inc-add-product>
+    <inc-add-pickup-slot></inc-add-pickup-slot>
+    <inc-order-filters></inc-order-filters>
     <inc-footer></inc-footer>
     <script src="inc/inc.footer.js"></script>
     <script src="inc/inc.nav.js"></script>
     <script src="inc/inc.auth_popups.js"></script>
+    <script src="inc/inc.alert.js"></script>
+    <script src="inc/inc.admin_popups.js"></script>
     <script type="module" src="main.js"></script>
 </body>
 </html>

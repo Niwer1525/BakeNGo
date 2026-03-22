@@ -10,6 +10,18 @@ function setAdminFeedback(message, isError = false) {
 	dom.adminControlsFeedback.style.color = isError ? "#bb3a1d" : "var(--success)";
 }
 
+function setProductFeedback(message, isError = false) {
+	if (!dom.addProductFeedback) return;
+	dom.addProductFeedback.textContent = message;
+	dom.addProductFeedback.style.color = isError ? "#bb3a1d" : "var(--success)";
+}
+
+function setPickupSlotFeedback(message, isError = false) {
+	if (!dom.addPickupSlotFeedback) return;
+	dom.addPickupSlotFeedback.textContent = message;
+	dom.addPickupSlotFeedback.style.color = isError ? "#bb3a1d" : "var(--success)";
+}
+
 function setOrderFeedback(message, isError = false) {
 	if (!dom.orderFeedback) return;
 	dom.orderFeedback.textContent = message;
@@ -51,9 +63,12 @@ export async function placeOrder() {
 	}
 
 	try {
+        const slotObj = state.slots.find(s => s.id === state.selectedSlot);
+        const slotLabel = slotObj ? `${slotObj.day} (${slotObj.startTime} - ${slotObj.endTime})` : String(state.selectedSlot);
+
 		await createOrder({
 			customer_email: customerEmail,
-			pickup_slot: state.selectedSlot,
+			pickup_slot: slotLabel,
 			pickup_date: new Date().toISOString().slice(0, 10),
 			items
 		});
@@ -116,7 +131,7 @@ export function wirePopups() {
 				await refreshPageData();
 			} catch (error) {
 				console.error(error);
-				alert(`Could not sign in: ${error.message}`);
+				window.showAlert(`Could not sign in: ${error.message}`);
 			}
 		});
 	}
@@ -130,24 +145,68 @@ export function wirePopups() {
 
 			try {
 				await signUp({ email, password });
+				const user = await signIn({ email, password });
+				authState.email = user.email;
+				authState.isAdmin = Boolean(user.is_admin);
+				saveAuthState();
+				applyAuthUiState();
+
 				dom.createAccountForm.reset();
 				dom.createAccountPopup.style.display = "none";
-				alert("Account created. You can now sign in.");
+				await refreshPageData();
 			} catch (error) {
 				console.error(error);
-				alert(`Could not create account: ${error.message}`);
+				window.showAlert(`Could not create account or sign in: ${error.message}`);
 			}
 		});
 	}
 }
 
 export function wireActions() {
-	if (dom.restartBtn) {
-		dom.restartBtn.textContent = "Refresh Live Data";
-		dom.restartBtn.addEventListener("click", refreshPageData);
+	if (dom.openAddProductBtn && dom.addProductPopup) {
+		dom.openAddProductBtn.addEventListener("click", () => {
+			dom.addProductPopup.style.display = "flex";
+			const firstField = dom.adminProductForm?.elements.namedItem("name");
+			if (firstField && typeof firstField.focus === "function") {
+				firstField.focus();
+			}
+		});
 	}
 
-	if (dom.checkoutBtn) {
+	if (dom.closeAddProductPopupBtn && dom.addProductPopup) {
+		dom.closeAddProductPopupBtn.addEventListener("click", () => {
+			dom.addProductPopup.style.display = "none";
+		});
+	}
+
+	if (dom.openAddPickupSlotBtn && dom.addPickupSlotPopup) {
+		dom.openAddPickupSlotBtn.addEventListener("click", () => {
+			dom.addPickupSlotPopup.style.display = "flex";
+			const firstField = dom.adminSlotForm?.elements.namedItem("day");
+			if (firstField && typeof firstField.focus === "function") {
+				firstField.focus();
+			}
+		});
+	}
+
+	if (dom.closeAddPickupSlotPopupBtn && dom.addPickupSlotPopup) {
+		dom.closeAddPickupSlotPopupBtn.addEventListener("click", () => {
+			dom.addPickupSlotPopup.style.display = "none";
+		});
+	}
+
+	        if (dom.openOrderFiltersBtn && dom.orderFiltersPopup) {
+                dom.openOrderFiltersBtn.addEventListener("click", () => {
+                        dom.orderFiltersPopup.style.display = "flex";
+                });
+        }
+
+        if (dom.closeOrderFiltersPopupBtn && dom.orderFiltersPopup) {
+                dom.closeOrderFiltersPopupBtn.addEventListener("click", () => {
+                        dom.orderFiltersPopup.style.display = "none";
+                });
+        }
+		if (dom.checkoutBtn) {
 		dom.checkoutBtn.addEventListener("click", placeOrder);
 	}
 
@@ -170,12 +229,12 @@ export function wireActions() {
 			const isActive = Boolean(dom.adminProductForm.elements.namedItem("is-active")?.checked);
 
 			if (Number.isNaN(price) || price < 0) {
-				setAdminFeedback("Price must be a non-negative number.", true);
+				setProductFeedback("Price must be a non-negative number.", true);
 				return;
 			}
 
 			if (!Number.isInteger(stock) || stock < 0) {
-				setAdminFeedback("Stock must be a non-negative integer.", true);
+				setProductFeedback("Stock must be a non-negative integer.", true);
 				return;
 			}
 
@@ -188,11 +247,16 @@ export function wireActions() {
 					is_active: isActive
 				});
 				dom.adminProductForm.reset();
-				setAdminFeedback("Product created successfully.");
+				setProductFeedback("Product created successfully.");
+				setTimeout(() => {
+					if (dom.addProductPopup) {
+						dom.addProductPopup.style.display = "none";
+					}
+				}, 1500);
 				await refreshPageData();
 			} catch (error) {
 				console.error(error);
-				setAdminFeedback(`Could not create product: ${error.message}`, true);
+				setProductFeedback(`Could not create product: ${error.message}`, true);
 			}
 		});
 	}
@@ -202,33 +266,39 @@ export function wireActions() {
 			event.preventDefault();
 			if (!ensureAdminAccess()) return;
 
-			const label = dom.adminSlotForm.elements.namedItem("label")?.value || "";
+			const day = dom.adminSlotForm.elements.namedItem("day")?.value || "";
 			const startTime = dom.adminSlotForm.elements.namedItem("start-time")?.value || "";
 			const endTime = dom.adminSlotForm.elements.namedItem("end-time")?.value || "";
 			const capacity = Number(dom.adminSlotForm.elements.namedItem("capacity")?.value || "0");
 			const isEnabled = Boolean(dom.adminSlotForm.elements.namedItem("is-enabled")?.checked);
 
 			if (!Number.isInteger(capacity) || capacity <= 0) {
-				setAdminFeedback("Capacity must be a positive integer.", true);
+				setPickupSlotFeedback("Capacity must be a positive integer.", true);
 				return;
 			}
 
 			try {
 				await createPickupSlot({
-					label,
+					day,
 					start_time: startTime,
 					end_time: endTime,
 					capacity,
 					is_enabled: isEnabled
 				});
 				dom.adminSlotForm.reset();
-				setAdminFeedback("Pickup slot created successfully.");
+				setPickupSlotFeedback("Pickup slot created successfully.");
+				setTimeout(() => {
+					if (dom.addPickupSlotPopup) {
+						dom.addPickupSlotPopup.style.display = "none";
+					}
+				}, 1500);
 				await refreshPageData();
 			} catch (error) {
 				console.error(error);
-				setAdminFeedback(`Could not create pickup slot: ${error.message}`, true);
+				setPickupSlotFeedback(`Could not create pickup slot: ${error.message}`, true);
 			}
 		});
 	}
 }
+
 

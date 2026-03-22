@@ -85,11 +85,11 @@ class TableOperationsTest {
 
     @Test
     void pickupSlotValidationAndReadWorks() {
-        TablePickupSlot.addPickupSlot("Morning", "07:30", "08:00", 20, true);
+        TablePickupSlot.addPickupSlot("Monday", "07:30", "08:00", 20, true);
         assertEquals(1, TablePickupSlot.getEnabledPickupSlots().size());
 
         assertThrows(IllegalArgumentException.class, () -> TablePickupSlot.addPickupSlot("", "07:30", "08:00", 20, true));
-        assertThrows(IllegalArgumentException.class, () -> TablePickupSlot.addPickupSlot("Slot", "07:30", "08:00", 0, true));
+        assertThrows(IllegalArgumentException.class, () -> TablePickupSlot.addPickupSlot("Monday", "07:30", "08:00", 0, true));
     }
 
     @Test
@@ -127,17 +127,19 @@ class TableOperationsTest {
 
     @Test
     void pickupSlotCrudAndValidationWork() {
-        TablePickupSlot.addPickupSlot("Morning", "07:30", "08:00", 20, true);
+        TablePickupSlot.addPickupSlot("Monday", "07:30", "08:00", 20, true);
+        
+        server.objects.PickupSlot slot = TablePickupSlot.getAllPickupSlots().get(0);
 
-        TablePickupSlot.updateCapacity("Morning", 25);
-        assertEquals(25, TablePickupSlot.getPickupSlotByLabel("Morning").capacity());
+        TablePickupSlot.updateCapacity(slot.id(), 25);
+        assertEquals(25, TablePickupSlot.getPickupSlotById(slot.id()).capacity());
 
-        TablePickupSlot.deletePickupSlot("Morning");
+        TablePickupSlot.deletePickupSlot(slot.id());
         assertTrue(TablePickupSlot.getAllPickupSlots().isEmpty());
 
-        assertThrows(IllegalArgumentException.class, () -> TablePickupSlot.updateCapacity("", 10));
-        assertThrows(IllegalArgumentException.class, () -> TablePickupSlot.updateCapacity("Unknown", 10));
-        assertThrows(IllegalArgumentException.class, () -> TablePickupSlot.deletePickupSlot("Unknown"));
+        assertThrows(IllegalArgumentException.class, () -> TablePickupSlot.updateCapacity(-1, 10));
+        assertThrows(IllegalArgumentException.class, () -> TablePickupSlot.updateCapacity(999, 10));
+        assertThrows(IllegalArgumentException.class, () -> TablePickupSlot.deletePickupSlot(999));
     }
 
     @Test

@@ -20,4 +20,4 @@ class IncHeader extends HTMLElement {
         `;
     }
 }
-customElements.define('inc-header', IncHeader);
+customElements.define('inc-header', IncHeader); 

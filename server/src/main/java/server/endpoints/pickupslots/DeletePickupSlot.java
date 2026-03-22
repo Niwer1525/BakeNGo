@@ -8,7 +8,7 @@ public class DeletePickupSlot implements IEndpoint {
 
     @Override
     public String path() {
-        return "/api/pickup-slots/{label}";
+        return "/api/pickup-slots/{id}";
     }
 
     @Override
@@ -18,8 +18,8 @@ public class DeletePickupSlot implements IEndpoint {
 
     @Override
     public void handle(Context ctx) {
-        final String label = ctx.pathParam("label");
-        TablePickupSlot.deletePickupSlot(label);
+        final int id = Integer.parseInt(ctx.pathParam("id"));
+        TablePickupSlot.deletePickupSlot(id);
         ctx.status(204);
     }
 }

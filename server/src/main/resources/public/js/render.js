@@ -1,4 +1,4 @@
-import { deleteOrder, deletePickupSlot, deleteProduct, updateOrderStatus, updateProductStock } from "./api.js";
+import { deletePickupSlot, deleteProduct, updateOrderStatus, updateProductDetails, updatePickupSlotStatus } from "./api.js";
 import { authState, dom, state } from "./state.js";
 import { applyAuthUiState } from "./auth.js";
 
@@ -25,6 +25,8 @@ function getCartCount() {
 }
 
 export function renderCartSummary() {
+	if (!dom.heroActions) return;
+
 	let summary = document.getElementById("cart-summary");
 	if (!summary) {
 		summary = document.createElement("p");
@@ -34,8 +36,11 @@ export function renderCartSummary() {
 	}
 
 	const count = getCartCount();
+	const selectedSlotObj = state.slots.find(s => s.id === state.selectedSlot);
+	const slotLabel = selectedSlotObj ? `${selectedSlotObj.day} (${selectedSlotObj.startTime} - ${selectedSlotObj.endTime})` : "N/A";
+	
 	summary.textContent = count > 0
-		? `Cart: ${count} item(s) ready for slot ${state.selectedSlot || "N/A"}`
+		? `Cart: ${count} item(s) ready for slot ${slotLabel}`
 		: "Cart is empty. Add pastries to start an order.";
 }
 
@@ -149,7 +154,7 @@ export function renderProducts() {
 
 			const current = state.cart[productId] || 0;
 			if (current >= product.stock) {
-				alert("Cannot add more than available stock.");
+				window.showAlert("Cannot add more than available stock.");
 				return;
 			}
 
@@ -167,11 +172,12 @@ export function renderSlots() {
 	dom.slotList.innerHTML = "";
 	state.slots.filter((slot) => slot.isEnabled).forEach((slot) => {
 		const button = document.createElement("button");
-		button.className = `slot ${state.selectedSlot === slot.label ? "active" : ""}`.trim();
+		const slotLabel = `${slot.day} (${slot.startTime} - ${slot.endTime})`;
+		button.className = `slot ${state.selectedSlot === slot.id ? "active" : ""}`.trim();
 		button.type = "button";
-		button.textContent = slot.label;
+		button.textContent = slotLabel;
 		button.addEventListener("click", () => {
-			state.selectedSlot = slot.label;
+			state.selectedSlot = slot.id;
 			renderSlots();
 			renderCartSummary();
 		});
@@ -187,34 +193,70 @@ export function renderInventory() {
 	state.products.forEach((product) => {
 		const item = document.createElement("li");
 		item.className = "inventory-item";
+		const stockInputId = `stock-input-${product.id}`;
+		const priceInputId = `price-input-${product.id}`;
+		const activeInputId = `active-input-${product.id}`;
+		const productNameId = `inventory-product-name-${product.id}`;
+		const unitPrice = (Number(product.priceCents) / 100).toFixed(2);
 		item.innerHTML = `
-			<span>${product.name}</span>
-			<strong>${product.stock}</strong>
-			<input class="stock-input" type="number" min="0" value="${product.stock}" aria-label="Set stock for ${product.name}">
+			<div class="inventory-item-summary">
+				<strong id="${productNameId}" class="inventory-item-title">${product.name}</strong>
+				<span class="inventory-item-description">${product.description || "No description"}</span>
+			</div>
+			<div class="inventory-item-controls" aria-labelledby="${productNameId}">
+				<div class="inventory-control">
+					<label for="${stockInputId}">Stock quantity</label>
+					<input id="${stockInputId}" class="stock-input" type="number" min="0" value="${product.stock}" aria-label="Stock quantity for ${product.name}">
+				</div>
+				<div class="inventory-control">
+					<label for="${priceInputId}">Unit price ($)</label>
+					<input id="${priceInputId}" class="stock-input" type="number" min="0" step="0.01" value="${unitPrice}" aria-label="Unit price in dollars for ${product.name}">
+				</div>
+				<div class="inventory-control checkbox-control">
+					<input id="${activeInputId}" type="checkbox" ${product.isActive ? "checked" : ""} aria-label="Is ${product.name} available for order">
+					<label for="${activeInputId}">Available</label>
+				</div>
+			</div>
 			<div class="manage-actions">
-				<button class="btn btn-outline small" type="button" data-action="set">Set</button>
+				<button class="btn btn-outline small" type="button" data-action="update" aria-label="Update details for ${product.name}">Update</button>
 				<button class="btn btn-outline small icon-btn" type="button" data-action="remove" aria-label="Remove product ${product.name}">
 					<i class="fa-solid fa-trash"></i>
 				</button>
 			</div>
 		`;
 
-		const input = item.querySelector(".stock-input");
-		const setButton = item.querySelector("button[data-action='set']");
+		const stockInput = item.querySelector(`#${stockInputId}`);
+		const priceInput = item.querySelector(`#${priceInputId}`);
+		const activeInput = item.querySelector(`#${activeInputId}`);
+		const updateButton = item.querySelector("button[data-action='update']");
 		const removeButton = item.querySelector("button[data-action='remove']");
-		setButton.addEventListener("click", async () => {
-			const newStock = Number(input.value);
-			if (!Number.isInteger(newStock) || newStock < 0) {
-				alert("Stock must be a non-negative integer.");
-				return;
+
+		stockInput.addEventListener("input", function() {
+			if (this.value < 0) this.value = Math.abs(this.value);
+		});
+		priceInput.addEventListener("input", function() {
+			if (this.value < 0) this.value = Math.abs(this.value);
+			if (this.value.includes(".")) {
+				const parts = this.value.split(".");
+				if (parts[1].length > 2) this.value = parts[0] + "." + parts[1].substring(0, 2);
 			}
+		});
+
+		updateButton.addEventListener("click", async () => {
+			const newStock = Number(stockInput.value);
+			const newUnitPrice = Number(priceInput.value);
+			const newIsActive = activeInput.checked;
 
 			try {
-				await updateProductStock(product.id, newStock);
+				await updateProductDetails(product.id, {
+					stock: newStock,
+					price_cents: Math.round(newUnitPrice * 100),
+					is_active: newIsActive
+				});
 				await refreshPageDataHandler();
 			} catch (error) {
 				console.error(error);
-				alert(`Could not update stock: ${error.message}`);
+				window.showAlert(`Could not update product: ${error.message}`);
 			}
 		});
 
@@ -225,7 +267,7 @@ export function renderInventory() {
 				await refreshPageDataHandler();
 			} catch (error) {
 				console.error(error);
-				alert(`Could not remove product: ${error.message}`);
+				window.showAlert(`Could not remove product: ${error.message}`);
 			}
 		});
 
@@ -241,26 +283,58 @@ export function renderPickupSlotManagement() {
 
 	state.slots.forEach((slot) => {
 		const item = document.createElement("li");
-		item.className = "admin-slot-item";
+		item.className = "inventory-item";
+		const slotLabel = `${slot.day} (${slot.startTime} - ${slot.endTime})`;
+		const activeInputId = `slot-active-input-${slot.id}`;
+		const slotNameId = `slot-name-${slot.id}`;
+
 		item.innerHTML = `
-			<span>${slot.label}</span>
-			<span>${slot.isEnabled ? "enabled" : "disabled"}</span>
-			<button class="btn btn-outline small icon-btn" type="button" aria-label="Remove pickup slot ${slot.label}">
-				<i class="fa-solid fa-trash"></i>
-			</button>
+			<div class="inventory-item-summary">
+				<strong id="${slotNameId}" class="inventory-item-title">${slotLabel}</strong>
+				<span class="inventory-item-description">Capacity: ${slot.capacity}</span>
+			</div>
+			<div class="inventory-item-controls" aria-labelledby="${slotNameId}">
+				<div class="inventory-control checkbox-control">
+					<input id="${activeInputId}" type="checkbox" ${slot.isEnabled ? "checked" : ""} aria-label="Is pickup slot ${slotLabel} enabled">
+					<label for="${activeInputId}">Enabled</label>
+				</div>
+			</div>
+			<div class="manage-actions">
+				<button class="btn btn-outline small" type="button" data-action="update" aria-label="Update details for pickup slot ${slotLabel}">Update</button>
+				<button class="btn btn-outline small icon-btn" type="button" data-action="remove" aria-label="Remove pickup slot ${slotLabel}">
+					<i class="fa-solid fa-trash"></i>
+				</button>
+			</div>
 		`;
 
-		const removeButton = item.querySelector("button");
-		removeButton.addEventListener("click", async () => {
+		const activeInput = item.querySelector(`#${activeInputId}`);
+		const updateButton = item.querySelector("button[data-action='update']");
+		const removeButton = item.querySelector("button[data-action='remove']");
+
+		updateButton.addEventListener("click", async () => {
+			const newIsEnabled = activeInput.checked;
 			try {
-				await deletePickupSlot(slot.label);
-				if (state.selectedSlot === slot.label) {
+				await updatePickupSlotStatus(slot.id, newIsEnabled);
+				if (!newIsEnabled && state.selectedSlot === slot.id) {
 					state.selectedSlot = null;
 				}
 				await refreshPageDataHandler();
 			} catch (error) {
 				console.error(error);
-				alert(`Could not remove pickup slot: ${error.message}`);
+				window.showAlert(`Could not update pickup slot: ${error.message}`);
+			}
+		});
+
+		removeButton.addEventListener("click", async () => {
+			try {
+				await deletePickupSlot(slot.id);
+				if (state.selectedSlot === slot.id) {
+					state.selectedSlot = null;
+				}
+				await refreshPageDataHandler();
+			} catch (error) {
+				console.error(error);
+				window.showAlert(`Could not remove pickup slot: ${error.message}`);
 			}
 		});
 
@@ -278,8 +352,43 @@ export function renderOrders() {
 	if (!authState.isAdmin) return;
 	if (!dom.orderList) return;
 
+	const searchInput = document.getElementById("order-search");
+	const statusFilter = document.getElementById("order-status-filter");
+
+	if (searchInput && !searchInput.dataset.listenerAttached) {
+		searchInput.addEventListener("input", renderOrders);
+		searchInput.dataset.listenerAttached = "true";
+	}
+	if (statusFilter && !statusFilter.dataset.listenerAttached) {
+		statusFilter.addEventListener("change", renderOrders);
+		statusFilter.dataset.listenerAttached = "true";
+	}
+
+	const searchTerm = searchInput ? searchInput.value.toLowerCase() : "";
+	const statusTerm = statusFilter ? statusFilter.value : "";
+
+	let filteredOrders = state.orders;
+	if (searchTerm) {
+		filteredOrders = filteredOrders.filter(o => 
+			(o.customerEmail && o.customerEmail.toLowerCase().includes(searchTerm)) ||
+			String(o.id).includes(searchTerm)
+		);
+	}
+	if (statusTerm) {
+		filteredOrders = filteredOrders.filter(o => (o.status || "PENDING") === statusTerm);
+	}
+
 	dom.orderList.innerHTML = "";
-	state.orders.forEach((order) => {
+	filteredOrders.forEach((order) => {
+		const rawItems = state.orderItemsByOrderId[order.id] || [];
+		const orderItemsMarkup = rawItems.length > 0
+			? rawItems.map((entry) => {
+				const product = state.products.find((item) => item.id === Number(entry.productId));
+				const productName = product?.name || `Product #${entry.productId}`;
+				return `<li>${entry.quantity}x ${productName}</li>`;
+			}).join("")
+			: "<li>No items</li>";
+
 		const item = document.createElement("li");
 		item.className = "order-item";
 		item.innerHTML = `
@@ -287,13 +396,19 @@ export function renderOrders() {
 			<span>${order.customerEmail || "unknown@customer"}</span>
 			<span>Pickup ${order.pickupSlot}</span>
 			<strong>${formatPrice(order.totalCents)}</strong>
+			<div class="order-items" aria-label="Ordered items for order ${order.id}">
+				<span class="order-items-title">Items</span>
+				<ul class="order-items-list">
+					${orderItemsMarkup}
+				</ul>
+			</div>
 			<select class="status-select" aria-label="Order ${order.id} status">
 				<option value="PENDING">PENDING</option>
-				<option value="CONFIRMED">CONFIRMED</option>
+				<option value="CONFIRMED">RETRIEVED</option>
 				<option value="READY">READY</option>
 				<option value="CANCELLED">CANCELLED</option>
 			</select>
-			<button class="btn btn-outline small" type="button">Set</button>
+			<button class="btn btn-outline small" type="button" aria-label="Update order ${order.id} status">Update</button>
 		`;
 
 		const statusSelect = item.querySelector(".status-select");
@@ -307,61 +422,12 @@ export function renderOrders() {
 				await refreshPageDataHandler();
 			} catch (error) {
 				console.error(error);
-				alert(`Could not update order status: ${error.message}`);
+				window.showAlert(`Could not update order status: ${error.message}`);
 			}
 		});
 
 		dom.orderList.appendChild(item);
 	});
-}
-
-function isCompletedOrder(order) {
-	const status = String(order?.status || "").toUpperCase();
-	return status === "READY" || status === "COMPLETED";
-}
-
-export function renderAllOrdersManagement() {
-	if (!authState.isAdmin) return;
-	if (!dom.allOrdersList) return;
-
-	dom.allOrdersList.innerHTML = "";
-	state.orders.forEach((order) => {
-		const item = document.createElement("li");
-		const completed = isCompletedOrder(order);
-		item.className = "admin-order-item";
-		item.innerHTML = `
-			<span>#${order.id}</span>
-			<span>${order.customerEmail || "unknown@customer"}</span>
-			<span>${order.status || "PENDING"}</span>
-			<button class="btn btn-outline small icon-btn" type="button" ${completed ? "" : "disabled"} aria-label="Remove order #${order.id}">
-				<i class="fa-solid fa-trash"></i>
-			</button>
-		`;
-
-		const removeButton = item.querySelector("button");
-		removeButton.addEventListener("click", async () => {
-			if (!isCompletedOrder(order)) {
-				alert("You can only remove completed orders.");
-				return;
-			}
-
-			try {
-				await deleteOrder(order.id);
-				await refreshPageDataHandler();
-			} catch (error) {
-				console.error(error);
-				alert(`Could not remove order: ${error.message}`);
-			}
-		});
-
-		dom.allOrdersList.appendChild(item);
-	});
-
-	if (state.orders.length === 0) {
-		const empty = document.createElement("li");
-		empty.textContent = "No orders yet.";
-		dom.allOrdersList.appendChild(empty);
-	}
 }
 
 export function renderAnalytics() {
@@ -416,7 +482,6 @@ export function renderAll() {
 	renderInventory();
 	renderPickupSlotManagement();
 	renderOrders();
-	renderAllOrdersManagement();
 	renderAnalytics();
 	renderCartSummary();
 }

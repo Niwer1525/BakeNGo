@@ -37,7 +37,7 @@ public final class ApiMappers {
     public static Map<String, Object> pickupSlot(PickupSlot slot) {
         final Map<String, Object> map = new LinkedHashMap<>();
         map.put("id", slot.id());
-        map.put("label", slot.label());
+        map.put("day", slot.day());
         map.put("start_time", slot.startTime());
         map.put("end_time", slot.endTime());
         map.put("capacity", slot.capacity());

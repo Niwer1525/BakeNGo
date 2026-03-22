@@ -5,11 +5,11 @@ import server.endpoints.EndpointUtils;
 import server.endpoints.IEndpoint;
 import server.tables.TablePickupSlot;
 
-public class PutPickupSlotCapacity implements IEndpoint {
+public class PutPickupSlotStatus implements IEndpoint {
 
     @Override
     public String path() {
-        return "/api/pickup-slots/{id}/capacity";
+        return "/api/pickup-slots/{id}/status";
     }
 
     @Override
@@ -21,9 +21,9 @@ public class PutPickupSlotCapacity implements IEndpoint {
     public void handle(Context ctx) {
         final int id = Integer.parseInt(ctx.pathParam("id"));
         final var body = EndpointUtils.parseJsonBody(ctx.body());
-        final int capacity = EndpointUtils.getRequiredInt(body, "capacity");
+        final boolean isEnabled = EndpointUtils.getRequiredBoolean(body, "is_enabled");
 
-        TablePickupSlot.updateCapacity(id, capacity);
+        TablePickupSlot.updateEnabled(id, isEnabled);
         ctx.json(TablePickupSlot.getPickupSlotById(id));
     }
 }

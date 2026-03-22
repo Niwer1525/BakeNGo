@@ -113,6 +113,28 @@ public class TableProduct extends Table {
     }
 
     /**
+     * Updates a product's stock, unit price, and active status in the database.
+     * 
+     * @param id The id of the product to update
+     * @param stock The new stock quantity
+     * @param priceCents The new unit price in cents
+     * @param isActive The new active status
+     */
+    public static void updateProductDetails(int id, int stock, int priceCents, boolean isActive) {
+        validateId(id, "Product id");
+        validateStock(stock);
+        validatePrice(priceCents);
+        ensureProductExists(id);
+
+        UpdateManager.update(App.DATA_BASE, TableProduct.class)
+            .set("stock", stock)
+            .set("price_cents", priceCents)
+            .set("is_active", isActive)
+            .where(Expression.of("COALESCE(NULLIF(id, 0), rowid)").isEqualTo(id))
+            .execute();
+    }
+
+    /**
      * Deletes a product from the database by its id.
      * 
      * @param id The id of the product to delete

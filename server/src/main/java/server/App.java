@@ -30,9 +30,11 @@ import server.endpoints.pickupslots.DeletePickupSlot;
 import server.endpoints.pickupslots.GetPickupSlots;
 import server.endpoints.pickupslots.PostPickupSlots;
 import server.endpoints.pickupslots.PutPickupSlotCapacity;
+import server.endpoints.pickupslots.PutPickupSlotStatus;
 import server.endpoints.products.DeleteProduct;
 import server.endpoints.products.GetProducts;
 import server.endpoints.products.PostProducts;
+import server.endpoints.products.PutProductDetails;
 import server.endpoints.products.PutProductStock;
 import server.logging.CroissantFlowLogTypes;
 import server.tables.TableAnalyticsMetric;
@@ -103,12 +105,14 @@ public class App {
 
                 IEndpoint.register(cfg, GetProducts.class);
                 IEndpoint.register(cfg, PostProducts.class);
+                IEndpoint.register(cfg, PutProductDetails.class);
                 IEndpoint.register(cfg, PutProductStock.class);
                 IEndpoint.register(cfg, DeleteProduct.class);
 
                 IEndpoint.register(cfg, GetPickupSlots.class);
                 IEndpoint.register(cfg, PostPickupSlots.class);
                 IEndpoint.register(cfg, PutPickupSlotCapacity.class);
+                IEndpoint.register(cfg, PutPickupSlotStatus.class);
                 IEndpoint.register(cfg, DeletePickupSlot.class);
                 
                 IEndpoint.register(cfg, GetOrders.class);

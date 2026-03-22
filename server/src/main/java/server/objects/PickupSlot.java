@@ -8,8 +8,8 @@ public class PickupSlot extends SQLSerializable<PickupSlot> {
     @IColumnField(name = "id", primaryKey = true, autoIncrement = true)
     private int id;
 
-    @IColumnField(name = "label", unique = true, notNull = true)
-    private String label;
+    @IColumnField(name = "day", notNull = true)
+    private String day;
 
     @IColumnField(name = "start_time", notNull = true)
     private String startTime;
@@ -25,7 +25,7 @@ public class PickupSlot extends SQLSerializable<PickupSlot> {
 
     public int id() { return id; }
 
-    public String label() { return label; }
+    public String day() { return day; }
 
     public String startTime() { return startTime; }
 

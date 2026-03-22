@@ -49,6 +49,11 @@ public final class EndpointUtils {
         return json.get(key).getAsBoolean();
     }
 
+    public static boolean getRequiredBoolean(JsonObject json, String key) {
+        if (!json.has(key) || json.get(key).isJsonNull()) throw new IllegalArgumentException("Missing required field: " + key);
+        return json.get(key).getAsBoolean();
+    }
+
     public static JsonArray getRequiredArray(JsonObject json, String key) {
         if (!json.has(key) || json.get(key).isJsonNull()) throw new IllegalArgumentException("Missing required field: " + key);
         return json.getAsJsonArray(key);

@@ -9,13 +9,24 @@ class LoginPopup extends HTMLElement {
                     <label for="email">Email:</label>
                     <input type="email" id="email" name="email" required>
                     <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" required autocomplete>
-                    <button type="submit">Sign In</button>
-                    <button type="button" class="btn btn-outline" id="open-create-account-btn" style="margin-top: 10px;">Don't have an account?</button>
+                    <div class="password-input-group">
+                        <input type="password" id="password" name="password" required autocomplete>
+                        <button type="button" class="toggle-password icon-btn" aria-label="Toggle password visibility"><i class="fa-solid fa-eye"></i></button>
+                    </div>
+                    <button type="submit" class="auth-submit-btn">Sign In</button>
+                    <button type="button" class="btn btn-outline auth-alt-btn" id="open-create-account-btn">Don't have an account?</button>
                 </form>
             </div>
         </div>
         `;
+
+        const toggleBtn = this.querySelector('.toggle-password');
+        const passwordInput = this.querySelector('#password');
+        toggleBtn.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            toggleBtn.innerHTML = type === 'password' ? '<i class="fa-solid fa-eye"></i>' : '<i class="fa-solid fa-eye-slash"></i>';
+        });
     }
 }
 customElements.define('inc-login', LoginPopup);
@@ -31,12 +42,23 @@ class CreateAccountPopup extends HTMLElement {
                     <label for="new-email">Email:</label>
                     <input type="email" id="new-email" name="new-email" required>
                     <label for="new-password">Password:</label>
-                    <input type="password" id="new-password" name="new-password" required autocomplete>
-                    <button type="submit">Create Account</button>
+                    <div class="password-input-group">
+                        <input type="password" id="new-password" name="new-password" required autocomplete>
+                        <button type="button" class="toggle-password icon-btn" aria-label="Toggle password visibility"><i class="fa-solid fa-eye"></i></button>
+                    </div>
+                    <button type="submit" class="auth-submit-btn">Create Account</button>
                 </form>
             </div>
         </div>
         `;
+
+        const toggleBtn = this.querySelector('.toggle-password');
+        const passwordInput = this.querySelector('#new-password');
+        toggleBtn.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            toggleBtn.innerHTML = type === 'password' ? '<i class="fa-solid fa-eye"></i>' : '<i class="fa-solid fa-eye-slash"></i>';
+        });
     }
 }
 customElements.define('inc-create-account', CreateAccountPopup);

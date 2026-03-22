@@ -23,23 +23,23 @@ public class TablePickupSlot extends Table {
     @Override public String name() { return "pickup_slots"; }
 
     /**
-     * Adds a new pickup slot to the database with the specified label, start time, end time, capacity, and enabled status.
+     * Adds a new pickup slot to the database with the specified day, start time, end time, capacity, and enabled status.
      * 
-     * @param label The label or name of the pickup slot to add (must be unique and non-blank)
+     * @param day The day of the pickup slot to add (must be non-blank)
      * @param startTime The start time of the pickup slot (must be non-blank)
      * @param endTime The end time of the pickup slot (must be non-blank)
      * @param capacity The maximum number of items that can be stored in the pickup slot (must be positive)
      * @param isEnabled Whether the pickup slot is enabled and available for use
      */
-    public static synchronized void addPickupSlot(String label, String startTime, String endTime, int capacity, boolean isEnabled) {
-        label = App.requireNonBlank(label, "Label");
+    public static synchronized void addPickupSlot(String day, String startTime, String endTime, int capacity, boolean isEnabled) {
+        day = App.requireNonBlank(day, "Day");
         startTime = App.requireNonBlank(startTime, "Start time");
         endTime = App.requireNonBlank(endTime, "End time");
         if (capacity <= 0) throw new IllegalArgumentException("Capacity must be greater than 0");
         final int pickupSlotId = getNextPickupSlotId();
 
-        InsertionManager.insert(App.DATA_BASE, TablePickupSlot.class, "id", "label", "start_time", "end_time", "capacity", "is_enabled")
-            .row(pickupSlotId, label, startTime, endTime, capacity, isEnabled)
+        InsertionManager.insert(App.DATA_BASE, TablePickupSlot.class, "id", "day", "start_time", "end_time", "capacity", "is_enabled")
+            .row(pickupSlotId, day, startTime, endTime, capacity, isEnabled)
             .execute();
     }
 
@@ -50,7 +50,7 @@ public class TablePickupSlot extends Table {
      */
     public static List<PickupSlot> getAllPickupSlots() {
         final SelectionManager query = SelectionManager.select(App.DATA_BASE, TablePickupSlot.class,
-            "COALESCE(NULLIF(id, 0), rowid) AS id", "label", "start_time", "end_time", "capacity", "is_enabled")
+            "COALESCE(NULLIF(id, 0), rowid) AS id", "day", "start_time", "end_time", "capacity", "is_enabled")
             .orderBy("rowid", SelectionManager.EnumOrder.ASC);
 
         try {
@@ -68,7 +68,7 @@ public class TablePickupSlot extends Table {
      */
     public static List<PickupSlot> getEnabledPickupSlots() {
         final SelectionManager query = SelectionManager.select(App.DATA_BASE, TablePickupSlot.class,
-            "COALESCE(NULLIF(id, 0), rowid) AS id", "label", "start_time", "end_time", "capacity", "is_enabled")
+            "COALESCE(NULLIF(id, 0), rowid) AS id", "day", "start_time", "end_time", "capacity", "is_enabled")
             .where(Expression.of("is_enabled").isEqualTo(true))
             .orderBy("rowid", SelectionManager.EnumOrder.ASC);
 
@@ -81,48 +81,60 @@ public class TablePickupSlot extends Table {
     }
 
     /**
-     * Gets a pickup slot from the database by its label.
+     * Gets a pickup slot from the database by its id.
      * 
-     * @param label The label of the pickup slot to get
-     * @return The pickup slot with the given label, or null if no such pickup slot exists
+     * @param id The id of the pickup slot to get
+     * @return The pickup slot with the given id, or null if no such pickup slot exists
      */
-    public static PickupSlot getPickupSlotByLabel(String label) {
-        label = App.requireNonBlank(label, "Label");
+    public static PickupSlot getPickupSlotById(int id) {
 
         return SelectionManager.select(App.DATA_BASE, TablePickupSlot.class,
-            "COALESCE(NULLIF(id, 0), rowid) AS id", "label", "start_time", "end_time", "capacity", "is_enabled")
-            .where(Expression.of("label").isEqualTo(label))
+            "COALESCE(NULLIF(id, 0), rowid) AS id", "day", "start_time", "end_time", "capacity", "is_enabled")
+            .where(Expression.of("COALESCE(NULLIF(id, 0), rowid)").isEqualTo(id))
             .executeSerializable(PickupSlot.class);
     }
 
     /**
      * Updates the capacity of a pickup slot in the database.
      * 
-     * @param label The label of the pickup slot to update
+     * @param id The id of the pickup slot to update
      * @param capacity The new capacity for the pickup slot (must be positive)
      */
-    public static void updateCapacity(String label, int capacity) {
-        label = App.requireNonBlank(label, "Label");
+    public static void updateCapacity(int id, int capacity) {
         if (capacity <= 0) throw new IllegalArgumentException("Capacity must be greater than 0");
-        if (getPickupSlotByLabel(label) == null) throw new IllegalArgumentException("Pickup slot with label " + label + " does not exist");
+        if (getPickupSlotById(id) == null) throw new IllegalArgumentException("Pickup slot with id " + id + " does not exist");
 
         UpdateManager.update(App.DATA_BASE, TablePickupSlot.class)
             .set("capacity", capacity)
-            .where(Expression.of("label").isEqualTo(label))
+            .where(Expression.of("COALESCE(NULLIF(id, 0), rowid)").isEqualTo(id))
             .execute();
     }
 
     /**
-     * Deletes a pickup slot from the database by its label.
-     * 
-     * @param label The label of the pickup slot to delete
+     * Updates the enabled status of a pickup slot.
+     *
+     * @param id The id of the pickup slot to update
+     * @param isEnabled The new enabled status
      */
-    public static void deletePickupSlot(String label) {
-        label = App.requireNonBlank(label, "Label");
-        if (getPickupSlotByLabel(label) == null) throw new IllegalArgumentException("Pickup slot with label " + label + " does not exist");
+    public static void updateEnabled(int id, boolean isEnabled) {
+        if (getPickupSlotById(id) == null) throw new IllegalArgumentException("Pickup slot with id " + id + " does not exist");
+
+        UpdateManager.update(App.DATA_BASE, TablePickupSlot.class)
+            .set("is_enabled", isEnabled)
+            .where(Expression.of("COALESCE(NULLIF(id, 0), rowid)").isEqualTo(id))
+            .execute();
+    }
+
+    /**
+     * Deletes a pickup slot from the database by its id.
+     * 
+     * @param id The id of the pickup slot to delete
+     */
+    public static void deletePickupSlot(int id) {
+        if (getPickupSlotById(id) == null) throw new IllegalArgumentException("Pickup slot with id " + id + " does not exist");
 
         DeletionManager.delete(App.DATA_BASE, TablePickupSlot.class)
-            .where(Expression.of("label").isEqualTo(label))
+            .where(Expression.of("COALESCE(NULLIF(id, 0), rowid)").isEqualTo(id))
             .execute();
     }
 
