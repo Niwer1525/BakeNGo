@@ -44,7 +44,7 @@ function normalizeOrderItem(item) {
 }
 
 export async function loadState() {
-	const products = await fetchProducts();
+	const products = await fetchProducts(authState.isAdmin);
 	const slots = await fetchPickupSlots(authState.isAdmin);
 	const orders = authState.isAdmin ? await fetchOrders() : [];
 

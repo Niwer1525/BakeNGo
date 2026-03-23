@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Croissant Flow</title>
+    <title>Dashboard - Bake n' Go</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -47,7 +47,10 @@
                 <article class="dashboard-card">
                     <div class="dashboard-card-header">
                         <h3>Pickup Slots</h3>
-                        <button class="btn btn-solid small icon-btn" id="open-add-pickup-slot-btn" type="button" aria-label="Add pickup slot">
+                        <button class="btn btn-outline small icon-btn" id="open-pickup-slot-filters-btn" type="button" aria-label="Filter pickup slots">
+                            <i class="fa-solid fa-filter"></i>
+                        </button>
+                        <button class="btn btn-outline small icon-btn" id="open-add-pickup-slot-btn" type="button" aria-label="Add pickup slot">
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </div>
@@ -57,7 +60,10 @@
                 <article class="dashboard-card">
                     <div class="dashboard-card-header">
                         <h3>Live Inventory</h3>
-                        <button class="btn btn-solid small icon-btn" id="open-add-product-btn" type="button" aria-label="Add product">
+                        <button class="btn btn-outline small icon-btn" id="open-product-filters-btn" type="button" aria-label="Filter products">
+                            <i class="fa-solid fa-filter"></i>
+                        </button>
+                        <button class="btn btn-outline small icon-btn" id="open-add-product-btn" type="button" aria-label="Add product">
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </div>
@@ -67,7 +73,7 @@
                 <article class="dashboard-card">
                     <div class="dashboard-card-header">
                         <h3>Incoming Orders</h3>
-                        <button class="btn btn-solid small icon-btn" id="open-order-filters-btn" type="button" aria-label="Filter orders">
+                        <button class="btn btn-outline small icon-btn" id="open-order-filters-btn" type="button" aria-label="Filter orders">
                             <i class="fa-solid fa-filter"></i>
                         </button>
                     </div>
@@ -79,6 +85,8 @@
     <inc-add-product></inc-add-product>
     <inc-add-pickup-slot></inc-add-pickup-slot>
     <inc-order-filters></inc-order-filters>
+    <inc-product-filters></inc-product-filters>
+    <inc-pickup-slot-filters></inc-pickup-slot-filters>
     <inc-footer></inc-footer>
     <script src="inc/inc.footer.js"></script>
     <script src="inc/inc.nav.js"></script>

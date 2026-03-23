@@ -82,6 +82,10 @@ class OrderFiltersPopup extends HTMLElement {
                         <option value="READY">READY</option>
                         <option value="CANCELLED">CANCELLED</option>
                     </select>
+                    <label for="order-slot-filter">Pickup Slot:</label>
+                    <select id="order-slot-filter" class="status-select stock-input">
+                        <option value="">All Slots</option>
+                    </select>
                 </form>
             </div>
         </div>
@@ -89,4 +93,52 @@ class OrderFiltersPopup extends HTMLElement {
     }
 }
 customElements.define('inc-order-filters', OrderFiltersPopup);
+
+class ProductFiltersPopup extends HTMLElement {
+    connectedCallback() {
+        this.innerHTML = `
+        <div class="product-filters-popup" id="product-filters-popup">
+            <div class="popup-content">
+                <span class="close-btn" id="close-product-filters-popup">&times;</span>
+                <h2>Filter Products</h2>
+                <form id="product-filters-form" class="admin-form" onsubmit="event.preventDefault();">
+                    <label for="product-search">Search Name or Description:</label>
+                    <input type="text" id="product-search" placeholder="Search products..." class="stock-input">
+                    <label for="product-status-filter">Status:</label>
+                    <select id="product-status-filter" class="status-select stock-input">
+                        <option value="">All</option>
+                        <option value="ACTIVE">Active</option>
+                        <option value="INACTIVE">Inactive</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+        `;
+    }
+}
+customElements.define('inc-product-filters', ProductFiltersPopup);
+
+class PickupSlotFiltersPopup extends HTMLElement {
+    connectedCallback() {
+        this.innerHTML = `
+        <div class="pickup-slot-filters-popup" id="pickup-slot-filters-popup">
+            <div class="popup-content">
+                <span class="close-btn" id="close-pickup-slot-filters-popup">&times;</span>
+                <h2>Filter Pickup Slots</h2>
+                <form id="pickup-slot-filters-form" class="admin-form" onsubmit="event.preventDefault();">
+                    <label for="slot-search">Search Day or Time:</label>
+                    <input type="text" id="slot-search" placeholder="Search slots..." class="stock-input">
+                    <label for="slot-status-filter">Status:</label>
+                    <select id="slot-status-filter" class="status-select stock-input">
+                        <option value="">All</option>
+                        <option value="ENABLED">Enabled</option>
+                        <option value="DISABLED">Disabled</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+        `;
+    }
+}
+customElements.define('inc-pickup-slot-filters', PickupSlotFiltersPopup);
 

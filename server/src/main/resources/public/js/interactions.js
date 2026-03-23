@@ -206,6 +206,31 @@ export function wireActions() {
                         dom.orderFiltersPopup.style.display = "none";
                 });
         }
+
+        if (dom.openProductFiltersBtn && dom.productFiltersPopup) {
+                dom.openProductFiltersBtn.addEventListener("click", () => {
+                        dom.productFiltersPopup.style.display = "flex";
+                });
+        }
+
+        if (dom.closeProductFiltersPopupBtn && dom.productFiltersPopup) {
+                dom.closeProductFiltersPopupBtn.addEventListener("click", () => {
+                        dom.productFiltersPopup.style.display = "none";
+                });
+        }
+
+        if (dom.openPickupSlotFiltersBtn && dom.pickupSlotFiltersPopup) {
+                dom.openPickupSlotFiltersBtn.addEventListener("click", () => {
+                        dom.pickupSlotFiltersPopup.style.display = "flex";
+                });
+        }
+
+        if (dom.closePickupSlotFiltersPopupBtn && dom.pickupSlotFiltersPopup) {
+                dom.closePickupSlotFiltersPopupBtn.addEventListener("click", () => {
+                        dom.pickupSlotFiltersPopup.style.display = "none";
+                });
+        }
+
 		if (dom.checkoutBtn) {
 		dom.checkoutBtn.addEventListener("click", placeOrder);
 	}

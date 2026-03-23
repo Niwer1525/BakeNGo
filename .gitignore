@@ -8,4 +8,4 @@ build
 .vscode
 
 # Ignore the data folder where the server will store its data
-croissant_flow_data
+bake_n_go_data

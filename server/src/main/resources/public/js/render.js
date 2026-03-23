@@ -1,4 +1,4 @@
-import { deletePickupSlot, deleteProduct, updateOrderStatus, updateProductDetails, updatePickupSlotStatus } from "./api.js";
+import { deletePickupSlot, deleteProduct, updateOrderStatus, updateProductDetails, updatePickupSlotStatus, updatePickupSlotCapacity } from "./api.js";
 import { authState, dom, state } from "./state.js";
 import { applyAuthUiState } from "./auth.js";
 
@@ -123,7 +123,7 @@ export function renderProducts() {
 	if (!dom.productGrid) return;
 
 	dom.productGrid.innerHTML = "";
-	state.products.forEach((product) => {
+	state.products.filter(p => p.isActive).forEach((product) => {
 		const card = document.createElement("article");
 		card.className = "product-card";
 
@@ -170,9 +170,13 @@ export function renderSlots() {
 	if (!dom.slotList) return;
 
 	dom.slotList.innerHTML = "";
-	state.slots.filter((slot) => slot.isEnabled).forEach((slot) => {
+	
+	const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+	const currentDay = days[new Date().getDay()].toLowerCase();
+
+	state.slots.filter((slot) => slot.isEnabled && slot.day.toLowerCase() === currentDay).forEach((slot) => {
 		const button = document.createElement("button");
-		const slotLabel = `${slot.day} (${slot.startTime} - ${slot.endTime})`;
+		const slotLabel = `${slot.startTime} - ${slot.endTime}`;
 		button.className = `slot ${state.selectedSlot === slot.id ? "active" : ""}`.trim();
 		button.type = "button";
 		button.textContent = slotLabel;
@@ -189,8 +193,36 @@ export function renderInventory() {
 	if (!authState.isAdmin) return;
 	if (!dom.stockList) return;
 
+	const searchInput = document.getElementById("product-search");
+	const statusFilter = document.getElementById("product-status-filter");
+
+	if (searchInput && !searchInput.dataset.listenerAttached) {
+		searchInput.addEventListener("input", renderInventory);
+		searchInput.dataset.listenerAttached = "true";
+	}
+	if (statusFilter && !statusFilter.dataset.listenerAttached) {
+		statusFilter.addEventListener("change", renderInventory);
+		statusFilter.dataset.listenerAttached = "true";
+	}
+
+	const searchTerm = searchInput ? searchInput.value.toLowerCase() : "";
+	const statusTerm = statusFilter ? statusFilter.value : "";
+
+	let filteredProducts = state.products;
+	if (searchTerm) {
+		filteredProducts = filteredProducts.filter(p => 
+			(p.name && p.name.toLowerCase().includes(searchTerm)) ||
+			(p.description && p.description.toLowerCase().includes(searchTerm))
+		);
+	}
+	if (statusTerm === "ACTIVE") {
+		filteredProducts = filteredProducts.filter(p => p.isActive);
+	} else if (statusTerm === "INACTIVE") {
+		filteredProducts = filteredProducts.filter(p => !p.isActive);
+	}
+
 	dom.stockList.innerHTML = "";
-	state.products.forEach((product) => {
+	filteredProducts.forEach((product) => {
 		const item = document.createElement("li");
 		item.className = "inventory-item";
 		const stockInputId = `stock-input-${product.id}`;
@@ -279,21 +311,54 @@ export function renderPickupSlotManagement() {
 	if (!authState.isAdmin) return;
 	if (!dom.adminSlotList) return;
 
+	const searchInput = document.getElementById("slot-search");
+	const statusFilter = document.getElementById("slot-status-filter");
+
+	if (searchInput && !searchInput.dataset.listenerAttached) {
+		searchInput.addEventListener("input", renderPickupSlotManagement);
+		searchInput.dataset.listenerAttached = "true";
+	}
+	if (statusFilter && !statusFilter.dataset.listenerAttached) {
+		statusFilter.addEventListener("change", renderPickupSlotManagement);
+		statusFilter.dataset.listenerAttached = "true";
+	}
+
+	const searchTerm = searchInput ? searchInput.value.toLowerCase() : "";
+	const statusTerm = statusFilter ? statusFilter.value : "";
+
+	let filteredSlots = state.slots;
+	if (searchTerm) {
+		filteredSlots = filteredSlots.filter(s => 
+			(s.day && s.day.toLowerCase().includes(searchTerm)) ||
+			(s.startTime && s.startTime.toLowerCase().includes(searchTerm)) ||
+			(s.endTime && s.endTime.toLowerCase().includes(searchTerm))
+		);
+	}
+	if (statusTerm === "ENABLED") {
+		filteredSlots = filteredSlots.filter(s => s.isEnabled);
+	} else if (statusTerm === "DISABLED") {
+		filteredSlots = filteredSlots.filter(s => !s.isEnabled);
+	}
+
 	dom.adminSlotList.innerHTML = "";
 
-	state.slots.forEach((slot) => {
+	filteredSlots.forEach((slot) => {
 		const item = document.createElement("li");
 		item.className = "inventory-item";
 		const slotLabel = `${slot.day} (${slot.startTime} - ${slot.endTime})`;
+		const capacityInputId = `slot-capacity-input-${slot.id}`;
 		const activeInputId = `slot-active-input-${slot.id}`;
 		const slotNameId = `slot-name-${slot.id}`;
 
 		item.innerHTML = `
 			<div class="inventory-item-summary">
 				<strong id="${slotNameId}" class="inventory-item-title">${slotLabel}</strong>
-				<span class="inventory-item-description">Capacity: ${slot.capacity}</span>
 			</div>
 			<div class="inventory-item-controls" aria-labelledby="${slotNameId}">
+				<div class="inventory-control">
+					<label for="${capacityInputId}">Capacity</label>
+					<input id="${capacityInputId}" class="stock-input" type="number" min="0" value="${slot.capacity}" aria-label="Capacity for pickup slot ${slotLabel}">
+				</div>
 				<div class="inventory-control checkbox-control">
 					<input id="${activeInputId}" type="checkbox" ${slot.isEnabled ? "checked" : ""} aria-label="Is pickup slot ${slotLabel} enabled">
 					<label for="${activeInputId}">Enabled</label>
@@ -307,14 +372,25 @@ export function renderPickupSlotManagement() {
 			</div>
 		`;
 
+		const capacityInput = item.querySelector(`#${capacityInputId}`);
 		const activeInput = item.querySelector(`#${activeInputId}`);
 		const updateButton = item.querySelector("button[data-action='update']");
 		const removeButton = item.querySelector("button[data-action='remove']");
 
+		capacityInput.addEventListener("input", function() {
+			if (this.value < 0) this.value = Math.abs(this.value);
+		});
+
 		updateButton.addEventListener("click", async () => {
+			const newCapacity = Number(capacityInput.value);
 			const newIsEnabled = activeInput.checked;
 			try {
-				await updatePickupSlotStatus(slot.id, newIsEnabled);
+				if (newCapacity !== slot.capacity) {
+					await updatePickupSlotCapacity(slot.id, newCapacity);
+				}
+				if (newIsEnabled !== slot.isEnabled) {
+					await updatePickupSlotStatus(slot.id, newIsEnabled);
+				}
 				if (!newIsEnabled && state.selectedSlot === slot.id) {
 					state.selectedSlot = null;
 				}
@@ -341,9 +417,9 @@ export function renderPickupSlotManagement() {
 		dom.adminSlotList.appendChild(item);
 	});
 
-	if (state.slots.length === 0) {
+	if (filteredSlots.length === 0) {
 		const empty = document.createElement("li");
-		empty.textContent = "No pickup slots configured.";
+		empty.textContent = "No pickup slots configured or matching filters.";
 		dom.adminSlotList.appendChild(empty);
 	}
 }
@@ -354,6 +430,7 @@ export function renderOrders() {
 
 	const searchInput = document.getElementById("order-search");
 	const statusFilter = document.getElementById("order-status-filter");
+	const slotFilter = document.getElementById("order-slot-filter");
 
 	if (searchInput && !searchInput.dataset.listenerAttached) {
 		searchInput.addEventListener("input", renderOrders);
@@ -363,9 +440,24 @@ export function renderOrders() {
 		statusFilter.addEventListener("change", renderOrders);
 		statusFilter.dataset.listenerAttached = "true";
 	}
+	if (slotFilter && !slotFilter.dataset.listenerAttached) {
+		slotFilter.addEventListener("change", renderOrders);
+		slotFilter.dataset.listenerAttached = "true";
+	}
+
+	if (slotFilter && slotFilter.options.length <= 1) {
+		state.slots.forEach(slot => {
+			const option = document.createElement("option");
+			const slotLabel = `${slot.day} (${slot.startTime} - ${slot.endTime})`;
+			option.value = slotLabel;
+			option.textContent = slotLabel;
+			slotFilter.appendChild(option);
+		});
+	}
 
 	const searchTerm = searchInput ? searchInput.value.toLowerCase() : "";
 	const statusTerm = statusFilter ? statusFilter.value : "";
+	const slotTerm = slotFilter ? slotFilter.value : "";
 
 	let filteredOrders = state.orders;
 	if (searchTerm) {
@@ -376,6 +468,9 @@ export function renderOrders() {
 	}
 	if (statusTerm) {
 		filteredOrders = filteredOrders.filter(o => (o.status || "PENDING") === statusTerm);
+	}
+	if (slotTerm) {
+		filteredOrders = filteredOrders.filter(o => o.pickupSlot === slotTerm);
 	}
 
 	dom.orderList.innerHTML = "";

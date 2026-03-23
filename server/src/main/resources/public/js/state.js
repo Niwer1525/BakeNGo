@@ -1,4 +1,4 @@
-export const AUTH_STORAGE_KEY = "croissant-flow-auth";
+export const AUTH_STORAGE_KEY = "bake-n-go-auth";
 
 export const state = {
 	products: [],
@@ -55,6 +55,12 @@ export const dom = {
 		openOrderFiltersBtn: document.getElementById("open-order-filters-btn"),
 		orderFiltersPopup: document.getElementById("order-filters-popup"),
 		closeOrderFiltersPopupBtn: document.getElementById("close-order-filters-popup"),
+		openProductFiltersBtn: document.getElementById("open-product-filters-btn"),
+		productFiltersPopup: document.getElementById("product-filters-popup"),
+		closeProductFiltersPopupBtn: document.getElementById("close-product-filters-popup"),
+		openPickupSlotFiltersBtn: document.getElementById("open-pickup-slot-filters-btn"),
+		pickupSlotFiltersPopup: document.getElementById("pickup-slot-filters-popup"),
+		closePickupSlotFiltersPopupBtn: document.getElementById("close-pickup-slot-filters-popup"),
 	addProductFeedback: document.getElementById("add-product-feedback"),
 	addPickupSlotFeedback: document.getElementById("add-pickup-slot-feedback"),
 	adminControlsFeedback: document.getElementById("admin-controls-feedback"),

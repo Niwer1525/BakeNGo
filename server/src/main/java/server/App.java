@@ -36,7 +36,7 @@ import server.endpoints.products.GetProducts;
 import server.endpoints.products.PostProducts;
 import server.endpoints.products.PutProductDetails;
 import server.endpoints.products.PutProductStock;
-import server.logging.CroissantFlowLogTypes;
+import server.logging.BakeNGoLogTypes;
 import server.tables.TableAnalyticsMetric;
 import server.tables.TableCustomerOrder;
 import server.tables.TableOrderItem;
@@ -50,15 +50,15 @@ import server.tables.TableUser;
  * @author Niwer
  */
 public class App {
-    public static final Container LOGGER = new Container("Croissant-Flow");
-    public static final File BASE_FOLDER = new File("./croissant_flow_data");
+    public static final Container LOGGER = new Container("BakeNGo");
+    public static final File BASE_FOLDER = new File("./bake_n_go_data");
     public static final DataBase DATA_BASE = new DataBase(new File(BASE_FOLDER, "main.db"));
 
     private static Configuration config;
 
     public static void main(String[] args) {
         LumenEngine.disablePrintingFromDefaultContainer(); // Prevent printing to the default container, we will handle it ourselves
-        Console.log("Starting the server").type(CroissantFlowLogTypes.WEB_SERVER).container(LOGGER).send();
+        Console.log("Starting the server").type(BakeNGoLogTypes.WEB_SERVER).container(LOGGER).send();
 
         /* Change debug level */
         {
@@ -71,7 +71,7 @@ public class App {
 
         /* Init base folder */
         if(!BASE_FOLDER.exists()) {
-            Console.log("Creating base folder at " + BASE_FOLDER.getAbsolutePath()).type(CroissantFlowLogTypes.WEB_SERVER).container(LOGGER).send();
+            Console.log("Creating base folder at " + BASE_FOLDER.getAbsolutePath()).type(BakeNGoLogTypes.WEB_SERVER).container(LOGGER).send();
             if(!BASE_FOLDER.mkdirs()) throw new RuntimeException("Failed to create base folder at " + BASE_FOLDER.getAbsolutePath());
         }
 
@@ -89,7 +89,7 @@ public class App {
         /* Initialize the web server */
         {
             final var APP = Javalin.create(cfg -> {
-                Console.log("Starting Web Server via Javalin").type(CroissantFlowLogTypes.WEB_SERVER).container(LOGGER).send();
+                Console.log("Starting Web Server via Javalin").type(BakeNGoLogTypes.WEB_SERVER).container(LOGGER).send();
     
                 // cfg.defaultContentType = "application/json";
                 // cfg.enableCorsForAllOrigins();
@@ -97,7 +97,7 @@ public class App {
                 cfg.routes.exception(IllegalArgumentException.class, (e, ctx) -> ctx.status(400).result(e.getMessage()));
                 cfg.routes.exception(NumberFormatException.class, (e, ctx) -> ctx.status(400).result("Invalid numeric value"));
                 cfg.routes.exception(QueryonException.class, (e, ctx) -> {
-                    Console.log("Database query error", e).type(CroissantFlowLogTypes.WEB_SERVER).error().container(LOGGER).send();
+                    Console.log("Database query error", e).type(BakeNGoLogTypes.WEB_SERVER).error().container(LOGGER).send();
                     ctx.status(500).result("Database query error");
                 });
 
@@ -131,7 +131,7 @@ public class App {
         
         /* Add shutdown hooks */
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            Console.log("Shutting down the server").type(CroissantFlowLogTypes.WEB_SERVER).container(LOGGER).send();
+            Console.log("Shutting down the server").type(BakeNGoLogTypes.WEB_SERVER).container(LOGGER).send();
             DATA_BASE.disconnect();
         }));
     }

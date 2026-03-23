@@ -5,11 +5,9 @@ import niwer.lumen.types.BasicLogType;
 import niwer.lumen.types.ILogType;
 
 /**
- * Log types used in Croissant Flow.
- * 
  * @author Niwer
  */
-public class CroissantFlowLogTypes {
+public class BakeNGoLogTypes {
 
     public static final ILogType WEB_SERVER = new BasicLogType("WEB SERVER", EnumLogColor.CYAN);
 }

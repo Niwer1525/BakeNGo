@@ -463,6 +463,8 @@ h1, h2, h3, h4 {
     border-radius: var(--radius-lg);
     padding: 2rem;
     box-shadow: var(--shadow-md);
+    max-height: 500px;
+    overflow-y: auto;
 }
 
 .dashboard-card h3 {
@@ -655,6 +657,8 @@ h1, h2, h3, h4 {
 .admin-form select,
 .stock-list input:not([type="checkbox"]),
 .stock-list select,
+.admin-slot-list input:not([type="checkbox"]),
+.admin-slot-list select,
 .order-list select {
     border: 1px solid var(--border-medium);
     border-radius: var(--radius-sm);
@@ -668,6 +672,8 @@ h1, h2, h3, h4 {
 
 .stock-list input:not([type="checkbox"]),
 .stock-list select,
+.admin-slot-list input:not([type="checkbox"]),
+.admin-slot-list select,
 .order-list select {
     padding: 0.4rem 0.75rem;
     font-size: 0.9rem;
@@ -679,6 +685,8 @@ h1, h2, h3, h4 {
 .admin-form select:focus,
 .stock-list input:focus,
 .stock-list select:focus,
+.admin-slot-list input:focus,
+.admin-slot-list select:focus,
 .order-list select:focus {
     outline: none;
     border-color: var(--brand-primary);
@@ -781,7 +789,7 @@ h1, h2, h3, h4 {
 }
 
 /* --- Popups --- */
-.sign-in-popup, .create-account-popup, .add-product-popup, .add-pickup-slot-popup, .order-filters-popup {
+.sign-in-popup, .create-account-popup, .add-product-popup, .add-pickup-slot-popup, .order-filters-popup, .product-filters-popup, .pickup-slot-filters-popup {
     display: none;
     position: fixed;
     inset: 0;

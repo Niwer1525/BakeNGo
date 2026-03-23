@@ -11,8 +11,8 @@ export async function apiRequest(path, options = {}) {
     return bodyText ? JSON.parse(bodyText) : null;
 }
 
-export function fetchProducts() {
-    return apiRequest("/api/products");
+export function fetchProducts(includeInactive = false) {
+    return apiRequest(`/api/products?include_inactive=${includeInactive ? "true" : "false"}`);
 }
 
 export function fetchPickupSlots(includeDisabled = false) {
@@ -52,6 +52,13 @@ export function updatePickupSlotStatus(id, isEnabled) {
     return apiRequest(`/api/pickup-slots/${id}/status`, {
         method: "PUT",
         body: JSON.stringify({ is_enabled: isEnabled })
+    });
+}
+
+export function updatePickupSlotCapacity(id, capacity) {
+    return apiRequest(`/api/pickup-slots/${id}/capacity`, {
+        method: "PUT",
+        body: JSON.stringify({ capacity })
     });
 }
 

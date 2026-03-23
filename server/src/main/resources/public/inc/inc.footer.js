@@ -8,7 +8,7 @@ class IncFooter extends HTMLElement {
                 <!-- Contact Info -->
                 <div class="footer-section">
                     <h4>Contact Us</h4>
-                    <p><a href="mailto:contact@croissantflow.com" class="footer-link">contact@croissantflow.com</a></p>
+                    <p><a href="mailto:contact@showcase.com" class="footer-link">contact@showcase.com</a></p>
                     <p><a href="tel:+33612xx5678" class="footer-link">06 12 xx xx 78</a></p>
                     <p>123 Bakery Lane<br>75001 Paris, France</p>
                 </div>

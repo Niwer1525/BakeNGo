@@ -4,7 +4,7 @@ class IncHeader extends HTMLElement {
         <header class="site-header">
             <nav class="navbar">
                 <a class="brand" href="/">
-                    CroissantFlow
+                    Bake n' Go
                     <p class="eyebrow">Click &amp; Collect For Local Bakeries</p>
                 </a>
                 <ul class="nav-links">
