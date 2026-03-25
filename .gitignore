@@ -3,9 +3,13 @@
 
 # Ignore Gradle build output directory
 build
+bin
+output
 
 # IDE specific files
 .vscode
 
 # Ignore the data folder where the server will store its data
 bake_n_go_data
+
+server/
