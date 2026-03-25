@@ -20,11 +20,11 @@ public class PutOrderStatus implements IEndpoint {
 
     @Override
     public void handle(Context ctx) {
-        final int orderId = Integer.parseInt(ctx.pathParam("id"));
-        final var body = EndpointUtils.parseJsonBody(ctx.body());
-        final String status = EndpointUtils.getRequiredString(body, "status");
+        final int ORDER_ID = Integer.parseInt(ctx.pathParam("id"));
+        final var BODY = EndpointUtils.parseJsonBody(ctx.body());
+        final String STATUS = EndpointUtils.getRequiredString(BODY, "status");
 
-        TableCustomerOrder.updateOrderStatus(orderId, status);
-        ctx.json(ApiMappers.order(TableCustomerOrder.getOrderById(orderId)));
+        TableCustomerOrder.updateOrderStatus(ORDER_ID, STATUS);
+        ctx.json(ApiMappers.order(TableCustomerOrder.getOrderById(ORDER_ID)));
     }
 }

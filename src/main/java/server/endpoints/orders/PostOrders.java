@@ -31,47 +31,47 @@ public class PostOrders implements IEndpoint {
 
     @Override
     public void handle(Context ctx) {
-        final var body = EndpointUtils.parseJsonBody(ctx.body());
+        final var BODY = EndpointUtils.parseJsonBody(ctx.body());
 
-        final Integer userId = EndpointUtils.getOptionalInt(body, "user_id", null);
-        final String customerEmail = EndpointUtils.getRequiredString(body, "customer_email");
-        final String pickupSlot = EndpointUtils.getRequiredString(body, "pickup_slot");
-        final String pickupDate = EndpointUtils.getRequiredString(body, "pickup_date");
-        final JsonArray itemsJson = EndpointUtils.getRequiredArray(body, "items");
+        final Integer USER_ID = EndpointUtils.getOptionalInt(BODY, "user_id", null);
+        final String CUSTOMER_EMAIL = EndpointUtils.getRequiredString(BODY, "customer_email");
+        final String PICKUP_SLOT = EndpointUtils.getRequiredString(BODY, "pickup_slot");
+        final String PICKUP_DATE = EndpointUtils.getRequiredString(BODY, "pickup_date");
+        final JsonArray ITEMS_JSON = EndpointUtils.getRequiredArray(BODY, "items");
 
-        if (itemsJson.isEmpty()) throw new IllegalArgumentException("Order items cannot be empty");
+        if (ITEMS_JSON.isEmpty()) throw new IllegalArgumentException("Order items cannot be empty");
 
-        final List<OrderDraftItem> items = new ArrayList<>();
+        final List<OrderDraftItem> ITEMS = new ArrayList<>();
         int totalCents = 0;
 
-        for (int i = 0; i < itemsJson.size(); i++) {
-            final var itemJson = itemsJson.get(i).getAsJsonObject();
-            final int productId = EndpointUtils.getRequiredInt(itemJson, "product_id");
-            final int quantity = EndpointUtils.getRequiredInt(itemJson, "quantity");
-            if (quantity <= 0) throw new IllegalArgumentException("Quantity must be greater than 0");
+        for (int i = 0; i < ITEMS_JSON.size(); i++) {
+            final var ITEM_JSON = ITEMS_JSON.get(i).getAsJsonObject();
+            final int PRODUCT_ID = EndpointUtils.getRequiredInt(ITEM_JSON, "product_id");
+            final int QUANTITY = EndpointUtils.getRequiredInt(ITEM_JSON, "quantity");
+            if (QUANTITY <= 0) throw new IllegalArgumentException("Quantity must be greater than 0");
 
-            final Product product = TableProduct.getProductById(productId);
-            if (product == null) throw new IllegalArgumentException("Product with id " + productId + " does not exist");
-            if (!product.isActive()) throw new IllegalArgumentException("Product with id " + productId + " is not active");
-            if (product.stock() < quantity) throw new IllegalArgumentException("Insufficient stock for product id " + productId);
+            final Product PRODUCT = TableProduct.getProductById(PRODUCT_ID);
+            if (PRODUCT == null) throw new IllegalArgumentException("Product with id " + PRODUCT_ID + " does not exist");
+            if (!PRODUCT.isActive()) throw new IllegalArgumentException("Product with id " + PRODUCT_ID + " is not active");
+            if (PRODUCT.stock() < QUANTITY) throw new IllegalArgumentException("Insufficient stock for product id " + PRODUCT_ID);
 
-            final int lineTotal = product.priceCents() * quantity;
-            totalCents += lineTotal;
-            items.add(new OrderDraftItem(productId, quantity, product.priceCents(), product.stock()));
+            final int LINE_TOTAL = PRODUCT.priceCents() * QUANTITY;
+            totalCents += LINE_TOTAL;
+            ITEMS.add(new OrderDraftItem(PRODUCT_ID, QUANTITY, PRODUCT.priceCents(), PRODUCT.stock()));
         }
 
-        final CustomerOrder order = TableCustomerOrder.addOrder(userId, customerEmail, pickupSlot, pickupDate, totalCents);
-        if (order == null) throw new IllegalStateException("Failed to create order");
+        final CustomerOrder ORDER = TableCustomerOrder.addOrder(USER_ID, CUSTOMER_EMAIL, PICKUP_SLOT, PICKUP_DATE, totalCents);
+        if (ORDER == null) throw new IllegalStateException("Failed to create order");
 
-        for (final OrderDraftItem item : items) {
-            TableOrderItem.addOrderItem(order.id(), item.productId(), item.quantity(), item.unitPriceCents());
-            TableProduct.updateStock(item.productId(), item.initialStock() - item.quantity());
+        for (final OrderDraftItem ITEM : ITEMS) {
+            TableOrderItem.addOrderItem(ORDER.id(), ITEM.productId(), ITEM.quantity(), ITEM.unitPriceCents());
+            TableProduct.updateStock(ITEM.productId(), ITEM.initialStock() - ITEM.quantity());
         }
 
-        final Map<String, Object> response = new LinkedHashMap<>();
-        response.put("order", ApiMappers.order(TableCustomerOrder.getOrderById(order.id())));
-        response.put("items", ApiMappers.orderItems(TableOrderItem.getItemsByOrderId(order.id())));
-        ctx.status(201).json(response);
+        final Map<String, Object> RESPONSE = new LinkedHashMap<>();
+        RESPONSE.put("order", ApiMappers.order(TableCustomerOrder.getOrderById(ORDER.id())));
+        RESPONSE.put("items", ApiMappers.orderItems(TableOrderItem.getItemsByOrderId(ORDER.id())));
+        ctx.status(201).json(RESPONSE);
     }
 
     private static record OrderDraftItem(int productId, int quantity, int unitPriceCents, int initialStock) {}

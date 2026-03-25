@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bake n' Go</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <inc-header></inc-header>
+    <main class="page-content">
+        <div class="introduction">
+            <h1>Seamless bakery ordering for busy mornings.</h1>
+            <p>
+                Bake n' Go helps customers pre-order pastries for the current day while bakers keep stock and production in sync in real time.
+                Note that this is a showcase application. Can be improved or adapted to other use cases depending on your needs.
+            </p>
+        </div>
+        <section class="catalog-section" id="catalog" aria-labelledby="catalog-title">
+            <div class="section-heading">
+                <h2>Customer Storefront</h2>
+            </div>
+            <div class="product-grid">
+                <article class="product-card">
+                    <h3>Butter Croissant</h3>
+                    <p class="product-meta">Classic laminated pastry</p>
+                    <p class="product-stock in-stock">30 left today</p>
+                    <div class="product-footer">
+                        <span class="price">$2.50</span>
+                        <button class="btn btn-solid small" type="button">Add</button>
+                    </div>
+                </article>
+                <article class="product-card">
+                    <h3>Chocolate Croissant</h3>
+                    <p class="product-meta">Dark chocolate baton</p>
+                    <p class="product-stock low-stock">12 left today</p>
+                    <div class="product-footer">
+                        <span class="price">$3.00</span>
+                        <button class="btn btn-solid small" type="button">Add</button>
+                    </div>
+                </article>
+                <article class="product-card">
+                    <h3>Almond Croissant</h3>
+                    <p class="product-meta">Toasted almonds and frangipane</p>
+                    <p class="product-stock low-stock">8 left today</p>
+                    <div class="product-footer">
+                        <span class="price">$3.50</span>
+                        <button class="btn btn-solid small" type="button">Add</button>
+                    </div>
+                </article>
+                <article class="product-card">
+                    <h3>Mini Pain Suisse</h3>
+                    <p class="product-meta">Vanilla cream and chocolate chips</p>
+                    <p class="product-stock in-stock">24 left today</p>
+                    <div class="product-footer">
+                        <span class="price">$2.90</span>
+                        <button class="btn btn-solid small" type="button">Add</button>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="hero-section">
+            <aside class="basket-panel" id="basket-panel" aria-label="Shopping basket">
+                <div class="basket-header">
+                    <h3>Your Basket</h3>
+                    <button class="btn btn-outline small icon-btn" id="clear-basket-btn" type="button" aria-label="Clear basket"><i class="fa-solid fa-trash"></i></button>
+                </div>
+                <ul class="basket-list" id="basket-list">
+                    <li class="basket-empty">Your basket is empty.</li>
+                </ul>
+                <div class="basket-email">
+                    <input type="email" id="customer-email-input" placeholder="john.doe@example.com" required>
+                    <p id="order-feedback"></p>
+                </div>
+                <div class="basket-footer">
+                    <p>Total: <strong id="basket-total">$0.00</strong></p>
+                    <button class="btn btn-solid" id="checkout-btn" type="button">Place Order</button>
+                </div>
+                <div class="hero-actions"></div>
+            </aside>
+            <aside class="pickup-card" aria-label="Pickup slot preview">
+                <h2>Pickup Slot for today</h2>
+                <p>Choose when you want your order ready.</p>
+                <div class="slot-list">
+                    <button class="slot active" type="button">07:30</button>
+                    <button class="slot" type="button">08:00</button>
+                    <button class="slot" type="button">08:30</button>
+                </div>
+            </aside>
+        </section>
+        <inc-create-account></inc-create-account>
+        <inc-login></inc-login>
+    </main>
+    <inc-footer></inc-footer>
+    <script src="inc/inc.head.js"></script>
+    <script src="inc/inc.footer.js"></script>
+    <script src="inc/inc.nav.js"></script>
+    <script src="inc/inc.auth_popups.js"></script>
+    <script src="inc/inc.alert.js"></script>
+    <script type="module" src="main.js"></script>
+</body>
+</html>

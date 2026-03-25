@@ -19,7 +19,7 @@ public class GetOrderItems implements IEndpoint {
 
     @Override
     public void handle(Context ctx) {
-        final int orderId = Integer.parseInt(ctx.pathParam("id"));
-        ctx.json(ApiMappers.orderItems(TableOrderItem.getItemsByOrderId(orderId)));
+        final int ORDER_ID = Integer.parseInt(ctx.pathParam("id"));
+        ctx.json(ApiMappers.orderItems(TableOrderItem.getItemsByOrderId(ORDER_ID)));
     }
 }

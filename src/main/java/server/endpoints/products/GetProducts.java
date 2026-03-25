@@ -19,8 +19,8 @@ public class GetProducts implements IEndpoint {
 
     @Override
     public void handle(Context ctx) {
-        final boolean includeInactive = ctx.queryParamAsClass("include_inactive", Boolean.class).getOrDefault(false);
-        if(includeInactive) ctx.json(ApiMappers.products(TableProduct.getAllProducts()));
+        final boolean INCLUDE_INACTIVE = ctx.queryParamAsClass("include_inactive", Boolean.class).getOrDefault(false);
+        if(INCLUDE_INACTIVE) ctx.json(ApiMappers.products(TableProduct.getAllProducts()));
         else ctx.json(ApiMappers.products(TableProduct.getActiveProducts()));
     }
 

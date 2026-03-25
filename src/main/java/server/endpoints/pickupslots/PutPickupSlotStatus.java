@@ -19,11 +19,11 @@ public class PutPickupSlotStatus implements IEndpoint {
 
     @Override
     public void handle(Context ctx) {
-        final int id = Integer.parseInt(ctx.pathParam("id"));
-        final var body = EndpointUtils.parseJsonBody(ctx.body());
-        final boolean isEnabled = EndpointUtils.getRequiredBoolean(body, "is_enabled");
+        final int ID = Integer.parseInt(ctx.pathParam("id"));
+        final var BODY = EndpointUtils.parseJsonBody(ctx.body());
+        final boolean IS_ENABLED = EndpointUtils.getRequiredBoolean(BODY, "is_enabled");
 
-        TablePickupSlot.updateEnabled(id, isEnabled);
-        ctx.json(TablePickupSlot.getPickupSlotById(id));
+        TablePickupSlot.updateEnabled(ID, IS_ENABLED);
+        ctx.json(TablePickupSlot.getPickupSlotById(ID));
     }
 }

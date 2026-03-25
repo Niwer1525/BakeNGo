@@ -23,20 +23,20 @@ public class PostAuthSignIn implements IEndpoint {
 
     @Override
     public void handle(Context ctx) {
-        final var body = EndpointUtils.parseJsonBody(ctx.body());
-        final String email = EndpointUtils.getRequiredString(body, "email");
-        final String password = EndpointUtils.getRequiredString(body, "password");
+        final var BODY = EndpointUtils.parseJsonBody(ctx.body());
+        final String EMAIL = EndpointUtils.getRequiredString(BODY, "email");
+        final String PASSWORD = EndpointUtils.getRequiredString(BODY, "password");
 
-        final User user = TableUser.signIn(email, password);
-        if (user == null) {
+        final User USER = TableUser.signIn(EMAIL, PASSWORD);
+        if (USER == null) {
             ctx.status(401).result("Invalid email or password");
             return;
         }
 
-        final Map<String, Object> response = new LinkedHashMap<>();
-        response.put("email", user.email());
-        response.put("is_admin", user.isAdmin());
+        final Map<String, Object> RESPONSE = new LinkedHashMap<>();
+        RESPONSE.put("email", USER.email());
+        RESPONSE.put("is_admin", USER.isAdmin());
 
-        ctx.json(response);
+        ctx.json(RESPONSE);
     }
 }

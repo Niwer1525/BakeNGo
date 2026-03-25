@@ -34,11 +34,11 @@ public class TableOrderItem extends Table {
         if (productId <= 0) throw new IllegalArgumentException("Product id must be greater than 0");
         if (quantity <= 0) throw new IllegalArgumentException("Quantity must be greater than 0");
         if (unitPriceCents < 0) throw new IllegalArgumentException("Unit price cannot be negative");
-        final int orderItemId = getNextOrderItemId();
+        final int ORDER_ITEM_ID = getNextOrderItemId();
 
         InsertionManager.insert(App.DATA_BASE, TableOrderItem.class,
             "id", "order_id", "product_id", "quantity", "unit_price_cents", "line_total_cents")
-            .row(orderItemId, orderId, productId, quantity, unitPriceCents, quantity * unitPriceCents)
+            .row(ORDER_ITEM_ID, orderId, productId, quantity, unitPriceCents, quantity * unitPriceCents)
             .execute();
     }
 
@@ -51,15 +51,15 @@ public class TableOrderItem extends Table {
     public static List<OrderItem> getItemsByOrderId(int orderId) {
         if (orderId <= 0) throw new IllegalArgumentException("Order id must be greater than 0");
 
-        final SelectionManager query = SelectionManager.select(App.DATA_BASE, TableOrderItem.class,
+        final SelectionManager QUERY = SelectionManager.select(App.DATA_BASE, TableOrderItem.class,
             "COALESCE(NULLIF(id, 0), rowid) AS id", "order_id", "product_id", "quantity", "unit_price_cents", "line_total_cents")
             .where(Expression.of("order_id").isEqualTo(orderId))
             .orderBy("rowid", SelectionManager.EnumOrder.ASC);
 
         try {
-            return query.executeList(OrderItem.class);
+            return QUERY.executeList(OrderItem.class);
         } catch (IllegalStateException ignored) {
-            final OrderItem single = query.executeSerializable(OrderItem.class);
+            final OrderItem single = QUERY.executeSerializable(OrderItem.class);
             return single == null ? List.of() : List.of(single);
         }
     }
@@ -85,14 +85,14 @@ public class TableOrderItem extends Table {
     }
 
     private static List<OrderItem> getAllOrderItems() {
-        final SelectionManager query = SelectionManager.select(App.DATA_BASE, TableOrderItem.class,
+        final SelectionManager QUERY = SelectionManager.select(App.DATA_BASE, TableOrderItem.class,
             "COALESCE(NULLIF(id, 0), rowid) AS id", "order_id", "product_id", "quantity", "unit_price_cents", "line_total_cents")
             .orderBy("rowid", SelectionManager.EnumOrder.ASC);
 
         try {
-            return query.executeList(OrderItem.class);
+            return QUERY.executeList(OrderItem.class);
         } catch (IllegalStateException ignored) {
-            final OrderItem single = query.executeSerializable(OrderItem.class);
+            final OrderItem single = QUERY.executeSerializable(OrderItem.class);
             return single == null ? List.of() : List.of(single);
         }
     }

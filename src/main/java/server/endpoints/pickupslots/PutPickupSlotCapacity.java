@@ -19,11 +19,11 @@ public class PutPickupSlotCapacity implements IEndpoint {
 
     @Override
     public void handle(Context ctx) {
-        final int id = Integer.parseInt(ctx.pathParam("id"));
-        final var body = EndpointUtils.parseJsonBody(ctx.body());
-        final int capacity = EndpointUtils.getRequiredInt(body, "capacity");
+        final int ID = Integer.parseInt(ctx.pathParam("id"));
+        final var BODY = EndpointUtils.parseJsonBody(ctx.body());
+        final int CAPACITY = EndpointUtils.getRequiredInt(BODY, "capacity");
 
-        TablePickupSlot.updateCapacity(id, capacity);
-        ctx.json(TablePickupSlot.getPickupSlotById(id));
+        TablePickupSlot.updateCapacity(ID, CAPACITY);
+        ctx.json(TablePickupSlot.getPickupSlotById(ID));
     }
 }

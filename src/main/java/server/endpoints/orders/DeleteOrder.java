@@ -18,8 +18,8 @@ public class DeleteOrder implements IEndpoint {
 
     @Override
     public void handle(Context ctx) {
-        final int orderId = Integer.parseInt(ctx.pathParam("id"));
-        TableCustomerOrder.deleteOrder(orderId);
+        final int ORDER_ID = Integer.parseInt(ctx.pathParam("id"));
+        TableCustomerOrder.deleteOrder(ORDER_ID);
         ctx.status(204);
     }
 }

@@ -18,8 +18,8 @@ public class DeletePickupSlot implements IEndpoint {
 
     @Override
     public void handle(Context ctx) {
-        final int id = Integer.parseInt(ctx.pathParam("id"));
-        TablePickupSlot.deletePickupSlot(id);
+        final int ID = Integer.parseInt(ctx.pathParam("id"));
+        TablePickupSlot.deletePickupSlot(ID);
         ctx.status(204);
     }
 }

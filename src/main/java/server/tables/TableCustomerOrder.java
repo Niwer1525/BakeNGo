@@ -39,16 +39,16 @@ public class TableCustomerOrder extends Table {
         pickupDate = App.requireNonBlank(pickupDate, "Pickup date");
         if (totalCents < 0) throw new IllegalArgumentException("Total cannot be negative");
 
-        final int orderId = getNextOrderId();
-        final long now = System.currentTimeMillis();
+        final int ORDER_ID = getNextOrderId();
+        final long NOW = System.currentTimeMillis();
         InsertionManager.insert(App.DATA_BASE, TableCustomerOrder.class,
             "id", "user_id", "customer_email", "status", "pickup_slot", "pickup_date", "total_cents", "created_at", "updated_at")
-            .row(orderId, userId, customerEmail, "PENDING", pickupSlot, pickupDate, totalCents, now, now)
+            .row(ORDER_ID, userId, customerEmail, "PENDING", pickupSlot, pickupDate, totalCents, NOW, NOW)
             .execute();
 
         return SelectionManager.select(App.DATA_BASE, TableCustomerOrder.class,
                 "COALESCE(NULLIF(id, 0), rowid) AS id", "user_id", "customer_email", "status", "pickup_slot", "pickup_date", "total_cents", "created_at", "updated_at")
-            .where(Expression.of("COALESCE(NULLIF(id, 0), rowid)").isEqualTo(orderId))
+            .where(Expression.of("COALESCE(NULLIF(id, 0), rowid)").isEqualTo(ORDER_ID))
             .executeSerializable(CustomerOrder.class);
     }
 
@@ -73,14 +73,14 @@ public class TableCustomerOrder extends Table {
      * @return A list of all CustomerOrder objects representing the orders in the database, ordered by creation date in descending order. If there are no orders, returns an empty list.
      */
     public static List<CustomerOrder> getAllOrders() {
-        final SelectionManager query = SelectionManager.select(App.DATA_BASE, TableCustomerOrder.class,
+        final SelectionManager QUERY = SelectionManager.select(App.DATA_BASE, TableCustomerOrder.class,
             "COALESCE(NULLIF(id, 0), rowid) AS id", "user_id", "customer_email", "status", "pickup_slot", "pickup_date", "total_cents", "created_at", "updated_at")
             .orderBy("rowid", SelectionManager.EnumOrder.DESC);
 
         try {
-            return query.executeList(CustomerOrder.class);
+            return QUERY.executeList(CustomerOrder.class);
         } catch (IllegalStateException ignored) {
-            final CustomerOrder single = query.executeSerializable(CustomerOrder.class);
+            final CustomerOrder single = QUERY.executeSerializable(CustomerOrder.class);
             return single == null ? List.of() : List.of(single);
         }
     }
@@ -127,15 +127,16 @@ public class TableCustomerOrder extends Table {
 
     private static String normalizeStatus(String status) {
         status = App.requireNonBlank(status, "Status").toUpperCase();
-        if (!status.equals("PENDING") && !status.equals("CONFIRMED") && !status.equals("READY") && !status.equals("CANCELLED")) {
+        if (!status.equals("PENDING") && !status.equals("CONFIRMED") && !status.equals("READY") && !status.equals("CANCELLED"))
             throw new IllegalArgumentException("Status must be one of PENDING, CONFIRMED, READY, CANCELLED");
-        }
+        
         return status;
     }
 
     private static String normalizeEmail(String email) {
         email = App.requireNonBlank(email, "Customer email").toLowerCase();
         if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) throw new IllegalArgumentException("Customer email is not valid");
+        
         return email;
     }
 

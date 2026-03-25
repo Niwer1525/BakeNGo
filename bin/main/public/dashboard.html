@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Bake n' Go</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <inc-header></inc-header>
+    <main class="page-content">
+        <!-- Analytics Section -->
+        <section class="analytics-section" id="analytics" aria-labelledby="analytics-title">
+            <div class="section-heading">
+                <h2 id="analytics-title">Smart Analytics</h2>
+            </div>
+            <div class="analytics-grid">
+                <article class="metric-card">
+                    <p class="metric-label">Top Seller</p>
+                    <p class="metric-value">Butter Croissant</p>
+                    <p class="metric-note">+14% vs last week</p>
+                </article>
+                <article class="metric-card">
+                    <p class="metric-label">Estimated Waste</p>
+                    <p class="metric-value">4.8%</p>
+                    <p class="metric-note">Down from 7.1%</p>
+                </article>
+                <article class="metric-card">
+                    <p class="metric-label">Peak Pickup</p>
+                    <p class="metric-value">08:00</p>
+                    <p class="metric-note">32 orders expected</p>
+                </article>
+            </div>
+        </section>
+        <!-- Dashboard Section -->
+        <section class="dashboard-section" id="dashboard" aria-labelledby="dashboard-title">
+            <div class="section-heading">
+                <h2 id="dashboard-title">Baker Dashboard</h2>
+            </div>
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Pickup Slots Card -->
+                <article class="dashboard-card">
+                    <div class="dashboard-card-header">
+                        <h3>Pickup Slots</h3>
+                        <button class="btn btn-outline small icon-btn" id="open-pickup-slot-filters-btn" type="button" aria-label="Filter pickup slots">
+                            <i class="fa-solid fa-filter"></i>
+                        </button>
+                        <button class="btn btn-outline small icon-btn" id="open-add-pickup-slot-btn" type="button" aria-label="Add pickup slot">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                    <ul class="admin-slot-list" id="admin-slot-list"></ul>
+                </article>
+                <!-- Live Inventory Card -->
+                <article class="dashboard-card">
+                    <div class="dashboard-card-header">
+                        <h3>Live Inventory</h3>
+                        <button class="btn btn-outline small icon-btn" id="open-product-filters-btn" type="button" aria-label="Filter products">
+                            <i class="fa-solid fa-filter"></i>
+                        </button>
+                        <button class="btn btn-outline small icon-btn" id="open-add-product-btn" type="button" aria-label="Add product">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                    <ul class="stock-list"></ul>
+                </article>
+                <!-- Incoming Orders Card -->
+                <article class="dashboard-card">
+                    <div class="dashboard-card-header">
+                        <h3>Incoming Orders</h3>
+                        <button class="btn btn-outline small icon-btn" id="open-order-filters-btn" type="button" aria-label="Filter orders">
+                            <i class="fa-solid fa-filter"></i>
+                        </button>
+                    </div>
+                    <ul class="order-list"></ul>
+                </article>
+            </div>
+        </section>
+    </main>
+    <inc-add-product></inc-add-product>
+    <inc-add-pickup-slot></inc-add-pickup-slot>
+    <inc-order-filters></inc-order-filters>
+    <inc-product-filters></inc-product-filters>
+    <inc-pickup-slot-filters></inc-pickup-slot-filters>
+    <inc-footer></inc-footer>
+    <script src="inc/inc.footer.js"></script>
+    <script src="inc/inc.nav.js"></script>
+    <script src="inc/inc.auth_popups.js"></script>
+    <script src="inc/inc.alert.js"></script>
+    <script src="inc/inc.admin_popups.js"></script>
+    <script type="module" src="main.js"></script>
+</body>
+</html>
+

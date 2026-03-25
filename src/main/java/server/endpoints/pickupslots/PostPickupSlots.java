@@ -20,15 +20,15 @@ public class PostPickupSlots implements IEndpoint {
 
     @Override
     public void handle(Context ctx) {
-        final var body = EndpointUtils.parseJsonBody(ctx.body());
+        final var BODY = EndpointUtils.parseJsonBody(ctx.body());
 
-        final String day = EndpointUtils.getRequiredString(body, "day");
-        final String startTime = EndpointUtils.getRequiredString(body, "start_time");
-        final String endTime = EndpointUtils.getRequiredString(body, "end_time");
-        final int capacity = EndpointUtils.getRequiredInt(body, "capacity");
-        final boolean isEnabled = EndpointUtils.getOptionalBoolean(body, "is_enabled", true);
+        final String DAY = EndpointUtils.getRequiredString(BODY, "day");
+        final String START_TIME = EndpointUtils.getRequiredString(BODY, "start_time");
+        final String END_TIME = EndpointUtils.getRequiredString(BODY, "end_time");
+        final int CAPACITY = EndpointUtils.getRequiredInt(BODY, "capacity");
+        final boolean IS_ENABLED = EndpointUtils.getOptionalBoolean(BODY, "is_enabled", true);
 
-        TablePickupSlot.addPickupSlot(day, startTime, endTime, capacity, isEnabled);
+        TablePickupSlot.addPickupSlot(DAY, START_TIME, END_TIME, CAPACITY, IS_ENABLED);
         ctx.status(201).json(ApiMappers.pickupSlots(TablePickupSlot.getAllPickupSlots()));
     }
 }

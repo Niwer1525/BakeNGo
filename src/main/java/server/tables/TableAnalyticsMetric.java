@@ -44,14 +44,14 @@ public class TableAnalyticsMetric extends Table {
      * @return a list of all analytics metrics, or an empty list if no metrics are found
      */
     public static List<AnalyticsMetric> getAllMetrics() {
-        final SelectionManager query = SelectionManager.select(App.DATA_BASE, TableAnalyticsMetric.class,
+        final SelectionManager QUERY = SelectionManager.select(App.DATA_BASE, TableAnalyticsMetric.class,
                 "COALESCE(NULLIF(id, 0), rowid) AS id", "metric_key", "metric_value", "metric_date", "created_at")
             .orderBy("rowid", SelectionManager.EnumOrder.DESC);
 
         try {
-            return query.executeList(AnalyticsMetric.class);
+            return QUERY.executeList(AnalyticsMetric.class);
         } catch (IllegalStateException ignored) {
-            final AnalyticsMetric single = query.executeSerializable(AnalyticsMetric.class);
+            final AnalyticsMetric single = QUERY.executeSerializable(AnalyticsMetric.class);
             return single == null ? List.of() : List.of(single);
         }
     }

@@ -36,10 +36,10 @@ public class TableProduct extends Table {
         description = normalizeDescription(description);
         validatePrice(priceCents);
         validateStock(stock);
-        final int productId = getNextProductId();
+        final int PRODUCT_ID = getNextProductId();
 
         InsertionManager.insert(App.DATA_BASE, TableProduct.class, "id", "name", "description", "price_cents", "stock", "is_active")
-            .row(productId, name, description, priceCents, stock, isActive)
+            .row(PRODUCT_ID, name, description, priceCents, stock, isActive)
             .execute();
     }
 
@@ -64,15 +64,15 @@ public class TableProduct extends Table {
      * @return A list of all products in the database, ordered by id ascending. If there are no products, returns an empty list.
      */
     public static List<Product> getAllProducts() {
-        final SelectionManager query = SelectionManager.select(App.DATA_BASE, TableProduct.class,
+        final SelectionManager QUERY = SelectionManager.select(App.DATA_BASE, TableProduct.class,
             "COALESCE(NULLIF(id, 0), rowid) AS id", "name", "description", "price_cents", "stock", "is_active")
             .orderBy("rowid", SelectionManager.EnumOrder.ASC);
 
         try {
-            return query.executeList(Product.class);
+            return QUERY.executeList(Product.class);
         } catch (IllegalStateException ignored) {
-            final Product single = query.executeSerializable(Product.class);
-            return single == null ? List.of() : List.of(single);
+            final Product SINGLE = QUERY.executeSerializable(Product.class);
+            return SINGLE == null ? List.of() : List.of(SINGLE);
         }
     }
 
@@ -82,16 +82,16 @@ public class TableProduct extends Table {
      * @return A list of all active products in the database, ordered by id ascending. If there are no active products, returns an empty list.
      */
     public static List<Product> getActiveProducts() {
-        final SelectionManager query = SelectionManager.select(App.DATA_BASE, TableProduct.class,
+        final SelectionManager QUERY = SelectionManager.select(App.DATA_BASE, TableProduct.class,
             "COALESCE(NULLIF(id, 0), rowid) AS id", "name", "description", "price_cents", "stock", "is_active")
             .where(Expression.of("is_active").isEqualTo(true))
             .orderBy("rowid", SelectionManager.EnumOrder.ASC);
 
         try {
-            return query.executeList(Product.class);
+            return QUERY.executeList(Product.class);
         } catch (IllegalStateException ignored) {
-            final Product single = query.executeSerializable(Product.class);
-            return single == null ? List.of() : List.of(single);
+            final Product SINGLE = QUERY.executeSerializable(Product.class);
+            return SINGLE == null ? List.of() : List.of(SINGLE);
         }
     }
 

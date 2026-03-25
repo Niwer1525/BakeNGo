@@ -19,8 +19,8 @@ public class GetPickupSlots implements IEndpoint {
 
     @Override
     public void handle(Context ctx) {
-        final boolean includeDisabled = ctx.queryParamAsClass("include_disabled", Boolean.class).getOrDefault(false);
-        if (includeDisabled) ctx.json(ApiMappers.pickupSlots(TablePickupSlot.getAllPickupSlots()));
+        final boolean INCLUDED_DISABLED = ctx.queryParamAsClass("include_disabled", Boolean.class).getOrDefault(false);
+        if (INCLUDED_DISABLED) ctx.json(ApiMappers.pickupSlots(TablePickupSlot.getAllPickupSlots()));
         else ctx.json(ApiMappers.pickupSlots(TablePickupSlot.getEnabledPickupSlots()));
     }
 }

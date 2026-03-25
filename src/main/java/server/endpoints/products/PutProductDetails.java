@@ -20,13 +20,13 @@ public class PutProductDetails implements IEndpoint {
 
     @Override
     public void handle(Context ctx) {
-        final int productId = Integer.parseInt(ctx.pathParam("id"));
-        final var body = EndpointUtils.parseJsonBody(ctx.body());
-        final int stock = EndpointUtils.getRequiredInt(body, "stock");
-        final int priceCents = EndpointUtils.getRequiredInt(body, "price_cents");
-        final boolean isActive = EndpointUtils.getOptionalBoolean(body, "is_active", true);
+        final int PRODUCT_ID = Integer.parseInt(ctx.pathParam("id"));
+        final var BODY = EndpointUtils.parseJsonBody(ctx.body());
+        final int STOCK = EndpointUtils.getRequiredInt(BODY, "stock");
+        final int PRICE_CENTS = EndpointUtils.getRequiredInt(BODY, "price_cents");
+        final boolean IS_ENABLED = EndpointUtils.getOptionalBoolean(BODY, "is_active", true);
 
-        TableProduct.updateProductDetails(productId, stock, priceCents, isActive);
-        ctx.json(ApiMappers.product(TableProduct.getProductById(productId)));
+        TableProduct.updateProductDetails(PRODUCT_ID, STOCK, PRICE_CENTS, IS_ENABLED);
+        ctx.json(ApiMappers.product(TableProduct.getProductById(PRODUCT_ID)));
     }
 }

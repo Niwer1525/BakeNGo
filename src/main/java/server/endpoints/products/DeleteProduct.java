@@ -18,8 +18,8 @@ public class DeleteProduct implements IEndpoint {
 
     @Override
     public void handle(Context ctx) {
-        final int productId = Integer.parseInt(ctx.pathParam("id"));
-        TableProduct.deleteProduct(productId);
+        final int PRODUCT_ID = Integer.parseInt(ctx.pathParam("id"));
+        TableProduct.deleteProduct(PRODUCT_ID);
         ctx.status(204);
     }
 }

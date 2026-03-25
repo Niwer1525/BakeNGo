@@ -20,11 +20,11 @@ public class PutProductStock implements IEndpoint {
 
     @Override
     public void handle(Context ctx) {
-        final int productId = Integer.parseInt(ctx.pathParam("id"));
-        final var body = EndpointUtils.parseJsonBody(ctx.body());
-        final int stock = EndpointUtils.getRequiredInt(body, "stock");
+        final int PRODUCT_ID = Integer.parseInt(ctx.pathParam("id"));
+        final var BODY = EndpointUtils.parseJsonBody(ctx.body());
+        final int STOCK = EndpointUtils.getRequiredInt(BODY, "stock");
 
-        TableProduct.updateStock(productId, stock);
-        ctx.json(ApiMappers.product(TableProduct.getProductById(productId)));
+        TableProduct.updateStock(PRODUCT_ID, STOCK);
+        ctx.json(ApiMappers.product(TableProduct.getProductById(PRODUCT_ID)));
     }
 }

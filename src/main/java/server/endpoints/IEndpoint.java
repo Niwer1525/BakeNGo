@@ -9,10 +9,25 @@ import io.javalin.http.Context;
  * @author Niwer
  */
 public interface IEndpoint {
+    /**
+     * Returns the path for this endpoint (e.g., "/api/auth/sign-up"). This path is used to route incoming requests to the appropriate handler.
+     * 
+     * @return The path for this endpoint
+     */
     String path();
     
+    /**
+     * Returns the HTTP method (GET, POST, PUT, DELETE) that this endpoint responds to.
+     * 
+     * @return The HTTP method for this endpoint
+     */
     HttpMethod method();
 
+    /**
+     * Handles incoming requests to this endpoint. The implementation should process the request and set the appropriate response on the provided Context object.
+     * 
+     * @param handler The Javalin Context object representing the incoming request and response. The handler should use this object to read request data and set the response.
+     */
     void handle(Context handler);
 
     /**

@@ -139,15 +139,15 @@ public class TableUser extends Table {
     }
 
     private static List<User> getAllUsers() {
-        final SelectionManager query = SelectionManager.select(App.DATA_BASE, TableUser.class,
+        final SelectionManager QUERY = SelectionManager.select(App.DATA_BASE, TableUser.class,
             "COALESCE(NULLIF(id, 0), rowid) AS id", "email", "password", "is_admin")
             .orderBy("rowid", SelectionManager.EnumOrder.ASC);
 
         try {
-            return query.executeList(User.class);
+            return QUERY.executeList(User.class);
         } catch (IllegalStateException ignored) {
-            final User single = query.executeSerializable(User.class);
-            return single == null ? List.of() : List.of(single);
+            final User SINGLE = QUERY.executeSerializable(User.class);
+            return SINGLE == null ? List.of() : List.of(SINGLE);
         }
     }
 }

@@ -39,3 +39,27 @@ tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
 }
+
+// Custom fat JAR task without Shadow plugin to avoid Gradle 9 compatibility issues
+tasks.register('fatJar', Jar) {
+    archiveBaseName = project.name
+    archiveClassifier = 'all'
+    
+    manifest {
+        attributes(
+            'Main-Class': 'server.App',
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version,
+        )
+    }
+    
+    from sourceSets.main.output
+    
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+    
+    // Exclude duplicate service files that cause issues
+    duplicatesStrategy ='exclude'
+}

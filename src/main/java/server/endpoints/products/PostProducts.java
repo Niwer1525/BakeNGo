@@ -20,15 +20,15 @@ public class PostProducts implements IEndpoint {
 
     @Override
     public void handle(Context ctx) {
-        final var body = EndpointUtils.parseJsonBody(ctx.body());
+        final var BODY = EndpointUtils.parseJsonBody(ctx.body());
 
-        final String name = EndpointUtils.getRequiredString(body, "name");
-        final String description = EndpointUtils.getOptionalString(body, "description", "");
-        final int priceCents = EndpointUtils.getRequiredInt(body, "price_cents");
-        final int stock = EndpointUtils.getRequiredInt(body, "stock");
-        final boolean isActive = EndpointUtils.getOptionalBoolean(body, "is_active", true);
+        final String NAME = EndpointUtils.getRequiredString(BODY, "name");
+        final String DESCRIPTION = EndpointUtils.getOptionalString(BODY, "description", "");
+        final int PRICE_CENTS = EndpointUtils.getRequiredInt(BODY, "price_cents");
+        final int STOCK = EndpointUtils.getRequiredInt(BODY, "stock");
+        final boolean IS_ENABLED = EndpointUtils.getOptionalBoolean(BODY, "is_active", true);
 
-        TableProduct.addProduct(name, description, priceCents, stock, isActive);
+        TableProduct.addProduct(NAME, DESCRIPTION, PRICE_CENTS, STOCK, IS_ENABLED);
         ctx.status(201).json(ApiMappers.products(TableProduct.getAllProducts()));
     }
 

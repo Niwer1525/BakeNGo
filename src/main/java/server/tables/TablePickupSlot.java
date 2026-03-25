@@ -36,10 +36,10 @@ public class TablePickupSlot extends Table {
         startTime = App.requireNonBlank(startTime, "Start time");
         endTime = App.requireNonBlank(endTime, "End time");
         if (capacity <= 0) throw new IllegalArgumentException("Capacity must be greater than 0");
-        final int pickupSlotId = getNextPickupSlotId();
+        final int PICKUP_SLOT_ID = getNextPickupSlotId();
 
         InsertionManager.insert(App.DATA_BASE, TablePickupSlot.class, "id", "day", "start_time", "end_time", "capacity", "is_enabled")
-            .row(pickupSlotId, day, startTime, endTime, capacity, isEnabled)
+            .row(PICKUP_SLOT_ID, day, startTime, endTime, capacity, isEnabled)
             .execute();
     }
 
@@ -49,15 +49,15 @@ public class TablePickupSlot extends Table {
      * @return A list of all pickup slots in the database, ordered by id ascending. If there are no pickup slots, returns an empty list.
      */
     public static List<PickupSlot> getAllPickupSlots() {
-        final SelectionManager query = SelectionManager.select(App.DATA_BASE, TablePickupSlot.class,
+        final SelectionManager QUERY = SelectionManager.select(App.DATA_BASE, TablePickupSlot.class,
             "COALESCE(NULLIF(id, 0), rowid) AS id", "day", "start_time", "end_time", "capacity", "is_enabled")
             .orderBy("rowid", SelectionManager.EnumOrder.ASC);
 
         try {
-            return query.executeList(PickupSlot.class);
+            return QUERY.executeList(PickupSlot.class);
         } catch (IllegalStateException ignored) {
-            final PickupSlot single = query.executeSerializable(PickupSlot.class);
-            return single == null ? List.of() : List.of(single);
+            final PickupSlot SINGLE = QUERY.executeSerializable(PickupSlot.class);
+            return SINGLE == null ? List.of() : List.of(SINGLE);
         }
     }
 
@@ -67,16 +67,16 @@ public class TablePickupSlot extends Table {
      * @return A list of all enabled pickup slots in the database, ordered by id ascending. If there are no enabled pickup slots, returns an empty list.
      */
     public static List<PickupSlot> getEnabledPickupSlots() {
-        final SelectionManager query = SelectionManager.select(App.DATA_BASE, TablePickupSlot.class,
+        final SelectionManager QUERY = SelectionManager.select(App.DATA_BASE, TablePickupSlot.class,
             "COALESCE(NULLIF(id, 0), rowid) AS id", "day", "start_time", "end_time", "capacity", "is_enabled")
             .where(Expression.of("is_enabled").isEqualTo(true))
             .orderBy("rowid", SelectionManager.EnumOrder.ASC);
 
         try {
-            return query.executeList(PickupSlot.class);
+            return QUERY.executeList(PickupSlot.class);
         } catch (IllegalStateException ignored) {
-            final PickupSlot single = query.executeSerializable(PickupSlot.class);
-            return single == null ? List.of() : List.of(single);
+            final PickupSlot SINGLE = QUERY.executeSerializable(PickupSlot.class);
+            return SINGLE == null ? List.of() : List.of(SINGLE);
         }
     }
 
