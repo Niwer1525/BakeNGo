@@ -1,6 +1,6 @@
 export const AUTH_STORAGE_KEY = "bake-n-go-auth";
 
-export const state = {
+export const STATE = {
 	products: [],
 	slots: [],
 	orders: [],
@@ -9,7 +9,7 @@ export const state = {
 	cart: {}
 };
 
-export const authState = {
+export const AUTH_STATE = {
 	email: null,
 	isAdmin: false
 };
@@ -18,7 +18,7 @@ export const authState = {
  * Centralized DOM element references for easy access across modules.
  * This helps avoid repeated queries and keeps the code organized.
  */
-export const dom = {
+export const DOM = {
 	productGrid: document.querySelector(".product-grid"),
 	basketPanel: document.getElementById("basket-panel"),
 	basketList: document.getElementById("basket-list"),
@@ -52,15 +52,15 @@ export const dom = {
 	closeAddPickupSlotPopupBtn: document.getElementById("close-add-pickup-slot-popup"),
 	adminSlotForm: document.getElementById("admin-slot-form"),
 	adminSlotList: document.getElementById("admin-slot-list"),
-		openOrderFiltersBtn: document.getElementById("open-order-filters-btn"),
-		orderFiltersPopup: document.getElementById("order-filters-popup"),
-		closeOrderFiltersPopupBtn: document.getElementById("close-order-filters-popup"),
-		openProductFiltersBtn: document.getElementById("open-product-filters-btn"),
-		productFiltersPopup: document.getElementById("product-filters-popup"),
-		closeProductFiltersPopupBtn: document.getElementById("close-product-filters-popup"),
-		openPickupSlotFiltersBtn: document.getElementById("open-pickup-slot-filters-btn"),
-		pickupSlotFiltersPopup: document.getElementById("pickup-slot-filters-popup"),
-		closePickupSlotFiltersPopupBtn: document.getElementById("close-pickup-slot-filters-popup"),
+	openOrderFiltersBtn: document.getElementById("open-order-filters-btn"),
+	orderFiltersPopup: document.getElementById("order-filters-popup"),
+	closeOrderFiltersPopupBtn: document.getElementById("close-order-filters-popup"),
+	openProductFiltersBtn: document.getElementById("open-product-filters-btn"),
+	productFiltersPopup: document.getElementById("product-filters-popup"),
+	closeProductFiltersPopupBtn: document.getElementById("close-product-filters-popup"),
+	openPickupSlotFiltersBtn: document.getElementById("open-pickup-slot-filters-btn"),
+	pickupSlotFiltersPopup: document.getElementById("pickup-slot-filters-popup"),
+	closePickupSlotFiltersPopupBtn: document.getElementById("close-pickup-slot-filters-popup"),
 	addProductFeedback: document.getElementById("add-product-feedback"),
 	addPickupSlotFeedback: document.getElementById("add-pickup-slot-feedback"),
 	adminControlsFeedback: document.getElementById("admin-controls-feedback"),

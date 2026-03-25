@@ -1,7 +1,13 @@
 import { fetchOrderItems, fetchOrders, fetchPickupSlots, fetchProducts } from "./api.js";
-import { authState, state } from "./state.js";
 import { renderAll } from "./render.js";
+import { AUTH_STATE, STATE } from "./state.js";
 
+/**
+ * Normalizes product data to ensure consistent structure.
+ * 
+ * @param {*} product The product data to normalize.
+ * @returns {Object} The normalized product object.
+ */
 function normalizeProduct(product) {
 	return {
 		id: Number(product?.id ?? 0),
@@ -13,6 +19,12 @@ function normalizeProduct(product) {
 	};
 }
 
+/**
+ * Normalizes pickup slot data to ensure consistent structure.
+ * 
+ * @param {*} slot The pickup slot data to normalize.
+ * @returns {Object} The normalized pickup slot object.
+ */
 function normalizeSlot(slot) {
 	return {
 		id: Number(slot?.id ?? 0),
@@ -24,6 +36,12 @@ function normalizeSlot(slot) {
 	};
 }
 
+/**
+ * Normalizes order data to ensure consistent structure.
+ * 
+ * @param {*} order The order data to normalize.
+ * @returns {Object} The normalized order object.
+ */
 function normalizeOrder(order) {
 	return {
 		id: Number(order?.id ?? 0),
@@ -43,36 +61,42 @@ function normalizeOrderItem(item) {
 	};
 }
 
+/**
+ * Fetches and loads all necessary data for the application state.
+ * 
+ * @returns {Promise<void>} A promise that resolves when the state has been loaded. 
+ */
 export async function loadState() {
-	const products = await fetchProducts(authState.isAdmin);
-	const slots = await fetchPickupSlots(authState.isAdmin);
-	const orders = authState.isAdmin ? await fetchOrders() : [];
+	const PRODUCTS = await fetchProducts(AUTH_STATE.isAdmin);
+	const SLOTS = await fetchPickupSlots(AUTH_STATE.isAdmin);
+	const ORDERS = AUTH_STATE.isAdmin ? await fetchOrders() : [];
 
-	state.products = Array.isArray(products) ? products.map(normalizeProduct) : [];
-	state.slots = Array.isArray(slots) ? slots.map(normalizeSlot) : [];
-	state.orders = Array.isArray(orders) ? orders.map(normalizeOrder) : [];
+	STATE.products = Array.isArray(PRODUCTS) ? PRODUCTS.map(normalizeProduct) : [];
+	STATE.slots = Array.isArray(SLOTS) ? SLOTS.map(normalizeSlot) : [];
+	STATE.orders = Array.isArray(ORDERS) ? ORDERS.map(normalizeOrder) : [];
 
-	if (!state.selectedSlot && state.slots.length > 0) {
-		const enabledSlots = state.slots.filter(s => s.isEnabled);
-		if(enabledSlots.length > 0) {
-			state.selectedSlot = enabledSlots[0].id;
-		}
+	if (!STATE.selectedSlot && STATE.slots.length > 0) {
+		const enabledSlots = STATE.slots.filter(s => s.isEnabled);
+		if(enabledSlots.length > 0) STATE.selectedSlot = enabledSlots[0].id;
 	}
 
-	if (!authState.isAdmin) {
-		state.orderItemsByOrderId = {};
+	if (!AUTH_STATE.isAdmin) {
+		STATE.orderItemsByOrderId = {};
 		return;
 	}
 
 	const orderItemsEntries = [];
-	for (const order of state.orders) {
+	for (const order of STATE.orders) {
 		const items = await fetchOrderItems(order.id);
 		orderItemsEntries.push([order.id, Array.isArray(items) ? items.map(normalizeOrderItem) : []]);
 	}
 
-	state.orderItemsByOrderId = Object.fromEntries(orderItemsEntries);
+	STATE.orderItemsByOrderId = Object.fromEntries(orderItemsEntries);
 }
 
+/**
+ * Refreshes the page data by reloading the state and re-rendering the UI.
+ */
 export async function refreshPageData() {
 	try {
 		await loadState();
