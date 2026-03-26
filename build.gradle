@@ -1,7 +1,5 @@
 buildscript {
-    repositories {
-		mavenCentral()
-	}
+    repositories { mavenCentral() }
 }
 
 plugins {
@@ -36,18 +34,37 @@ java {
 }
 
 tasks.named('test') {
-    // Use JUnit Platform for unit tests.
-    useJUnitPlatform()
+    useJUnitPlatform() // Use JUnit Platform for unit tests.
 }
 
-// Custom fat JAR task without Shadow plugin to avoid Gradle 9 compatibility issues
+// Docker image build task (configuration-cache compatible using Exec)
+tasks.register('dockerBuild', Exec) {
+    description = 'Build Docker image from Dockerfile'
+    group = 'docker'
+    
+    dependsOn 'fatJar'
+    
+    commandLine 'docker', 'build', '-t', "bake_n_go:${project.version}", '-t', 'bake_n_go:latest', '.'
+}
+
+// Save Docker image to tar file
+tasks.register('dockerSave', Exec) {
+    description = 'Save Docker image to tar file'
+    group = 'docker'
+    
+    dependsOn 'dockerBuild'
+    
+    commandLine 'docker', 'save', '-o', "build/bake_n_go-${project.version}.tar", "bake_n_go:${project.version}"
+}
+
+// Custom fat JAR task
 tasks.register('fatJar', Jar) {
     archiveBaseName = project.name
     archiveClassifier = 'all'
     
     manifest {
         attributes(
-            'Main-Class': 'server.App',
+            'Main-Class': 'niwer.bakengo.App',
             'Implementation-Title': project.name,
             'Implementation-Version': project.version,
         )
@@ -62,4 +79,8 @@ tasks.register('fatJar', Jar) {
     
     // Exclude duplicate service files that cause issues
     duplicatesStrategy ='exclude'
+}
+
+build {
+    dependsOn 'fatJar'
 }
