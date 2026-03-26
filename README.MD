@@ -1,8 +1,8 @@
 # Bake N' Go
 
 ## Overview
-
 Bake N' Go is a comprehensive order management and fulfillment platform designed for bakery and pastry businesses. The platform streamlines customer engagement, inventory management, and order logistics through an integrated web-based application.
+See it in [action](https://youtu.be/Tjjix8cpBXg) !
 
 ## Features
 
